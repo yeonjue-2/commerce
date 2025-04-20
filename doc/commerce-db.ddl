@@ -20,9 +20,8 @@ create table products
 (
     id        BIGINT AUTO_INCREMENT PRIMARY KEY,
     name      VARCHAR(100)  NOT NULL,
-    price     INT           NOT NULL,
+    amount    INT           NOT NULL,
     stock     INT           NOT NULL DEFAULT 0,
-    image_url VARCHAR(512),
     created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modified_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -32,16 +31,16 @@ create table orders
 (
     id     BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id            BIGINT                               NOT NULL,
-    product_id         BIGINT                               NULL,
+    product_id         BIGINT                               NOT NULL,
     order_status       ENUM ('INITIAL', 'PAID', 'CANCELED') NOT NULL  DEFAULT 'INITIAL',
-    total_price        INT                                  NOT NULL  DEFAULT 0,
+    total_amount       INT                                  NOT NULL  DEFAULT 0,
     quantity           INT                                  NOT NULL,
     kakaopay_ready_url VARCHAR(512),
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modified_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_id)    REFERENCES users(id)    ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
 );
 
 -- 결제 테이블
@@ -51,14 +50,13 @@ create table payments
     order_id       BIGINT                               NOT NULL,
     payment_method VARCHAR(30)                          NOT NULL COMMENT 'KAKAOPAY',
     payment_status ENUM ('INITIAL', 'PAID', 'CANCELED') NOT NULL DEFAULT 'INITIAL',
-    amount         INT                                  NOT NULL DEFAULT 0,
+    total_amount         INT                                  NOT NULL DEFAULT 0,
     pg_token       VARCHAR(255)                         NULL,
     transaction_id VARCHAR(100)                         NOT NULL,
     paid_at        TIMESTAMP                            NULL,
     canceled_at    TIMESTAMP                            NULL,
     fail_reason    VARCHAR(255)                         NULL,
     is_test        BOOLEAN                              NOT NULL DEFAULT FALSE,
-    payment_payload_json JSON                           NULL,
     created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modified_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -80,7 +78,6 @@ create table payment_history
     canceled_at    TIMESTAMP                            NULL,
     fail_reason    VARCHAR(255)                         NULL,
     is_test        BOOLEAN                              NOT NULL DEFAULT FALSE,
-    payment_payload_json JSON                           NULL,
     created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     modified_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
