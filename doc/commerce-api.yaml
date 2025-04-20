@@ -14,7 +14,7 @@ tags:
   - name: payment
     description: 결제 관련 API
 paths:
-  /orders:
+  /v1/orders:
     get:
       tags:
         - order
@@ -29,7 +29,10 @@ paths:
           description: 주문 상태 필터 (INITIAL, PAID, CANCELED)
           schema:
             type: string
-            enum: [INITIAL, PAID, CANCELED]
+            enum:
+              - INITIAL
+              - PAID
+              - CANCELED
             example: INITIAL
       responses:
         '200':
@@ -37,7 +40,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderListResponse"
+                $ref: "#/components/schemas/OrderListResponseV1"
         '400':
           description: Bad Request
           content:
@@ -49,9 +52,9 @@ paths:
                   $ref: "#/components/examples/INVALID_PAGE"
                 INVALID_SIZE:
                   $ref: "#/components/examples/INVALID_SIZE"
-                INVALID_STATUS:
-                  $ref: "#/components/examples/INVALID_STATUS"
-  /orders/{order_id}:
+                INVALID_ORDER_STATUS:
+                  $ref: "#/components/examples/INVALID_ORDER_STATUS"
+  /v1/orders/{order_id}:
     get:
       tags:
         - order
@@ -69,7 +72,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Order"
+                $ref: "#/components/schemas/OrderResponseV1"
         '400':
           description: Bad Request
           content:
@@ -77,8 +80,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
-                INVALID_TYPE_PARAM:
-                  $ref: "#/components/examples/INVALID_TYPE_PARAM"
+                INVALID_ORDER_ID_PARAM:
+                  $ref: "#/components/examples/INVALID_ORDER_ID_PARAM"
         '404':
           description: 해당 주문을 찾을 수 없음
           content:
@@ -86,9 +89,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
-                NOT_FOUND:
-                  $ref: "#/components/examples/NOT_FOUND"
-
+                NOT_FOUND_ORDER:
+                  $ref: "#/components/examples/NOT_FOUND_ORDER"
 
 components:
   parameters:
@@ -120,7 +122,7 @@ components:
         example: 123
 
   schemas:
-    Order:
+    OrderResponseV1:
       type: object
       properties:
         order_id:
@@ -134,7 +136,10 @@ components:
           example: 123
         order_status:
           type: string
-          enum: [INITIAL, PAID, CANCELED]
+          enum:
+            - INITIAL
+            - PAID
+            - CANCELED
           example: INITIAL
         total_price:
           type: integer
@@ -154,7 +159,7 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
-    OrderListResponse:
+    OrderListResponseV1:
       type: object
       properties:
         totalCount:
@@ -163,52 +168,48 @@ components:
         orders:
           type: array
           items:
-            $ref: "#/components/schemas/Order"
+            $ref: "#/components/schemas/OrderResponseV1"
     ErrorResponse:
       type: object
       properties:
-        code:
+        error_code:
+          type: integer
+        error_message:
           type: string
-        message:
-          type: string
-        timestamp:
-          type: string
-          format: date-time
+        error_data:
+          type: object
+          additionalProperties: true
+          example:
+            display_message: "display_message"
 
   examples:
-    BAD_REQUEST:
-      summary: 잘못된 요청 예시
-      value:
-        code: "BAD_REQUEST"
-        message: "잘못된 요청입니다."
-        timestamp: "2025-04-16T10:00:00Z"
     INVALID_PAGE:
       summary: 유효하지 않은 페이지 번호
       value:
-        code: "INVALID_PARAMETER"
-        message: "page는 1 이상의 숫자여야 합니다."
-        timestamp: "2025-04-16T10:00:00Z"
+        error_code: 100001
+        error_message: "page는 1 이상의 숫자여야 합니다."
+        error_data: null
     INVALID_SIZE:
       summary: 유효하지 않은 크기
       value:
-        code: "INVALID_PARAMETER"
-        message:  "page 당 size는 1에서 20 사이의 숫자여야 합니다."
-        timestamp: "2025-04-16T10:00:00Z"
-    INVALID_STATUS:
+        error_code: 100002
+        error_message:  "page 당 size는 1에서 20 사이의 숫자여야 합니다."
+        error_data: null
+    INVALID_ORDER_STATUS:
       summary: 존재하지 않는 주문 상태
       value:
-        code: "INVALID_PARAMETER"
-        message: "order_status 값은 INITIAL, PAID, CANCELED 중 하나여야 합니다."
-        timestamp: "2025-04-16T10:00:00Z"
-    INVALID_TYPE_PARAM:
-      summary: 유효하지 않는 타입의 파라미터
+        error_code: 300001
+        error_message: "order_status 값은 INITIAL, PAID, CANCELED 중 하나여야 합니다."
+        error_data: null
+    INVALID_ORDER_ID_PARAM:
+      summary: 유효하지 않는 파라미터
       value:
-        code: "INVALID_PARAMETER"
-        message: "파라미터 타입이 잘못되었습니다."
-        timestamp: "2025-04-16T10:00:00Z"
-    NOT_FOUND:
-      summary: 리소스를 찾을 수 없음
+        error_code: 300002
+        error_message: "파라미터 타입이 잘못되었습니다."
+        error_data: null
+    NOT_FOUND_ORDER:
+      summary: 해당하는 주문을 찾을 수 없음
       value:
-        code: "NOT_FOUND"
-        message: "데이터를 찾을 수 없습니다."
-        timestamp: "2025-04-16T10:00:00Z"
+        error_code: 300003
+        error_message: "주문 데이터를 찾을 수 없습니다."
+        error_data: null
