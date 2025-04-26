@@ -26,4 +26,12 @@ class OrderControllerTest {
                 .param("order_status", "INITIAL"))
                 .andExpect(status().isOk()); // 200 나오는지만 확인
     }
+
+    @Test
+    @Disabled
+    @DisplayName("GET, return OrderDto")
+    void getOrderById_success() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/v1/orders/{id}", 1L))
+                .andExpect(status().isOk()); // 200 나오는지만 확인
+    }
 }
