@@ -15,5 +15,5 @@ public class OrderListResponseDtoV1 {
     private List<OrderDto> orders;
     private int currentPage;
     private int totalPages;
-    private long tatalElements;
+    private long totalElements;
 }
