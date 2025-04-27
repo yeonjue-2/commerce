@@ -7,8 +7,12 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # 또는 create, none, validate 등
+      ddl-auto: update  # create, update, validate, none 중 하나 선택
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-    show-sql: true
+    show-sql: true      # 콘솔에 SQL 로그 출력
     database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        format_sql: true     # SQL 보기 좋게 출력
+      open-in-view: false    # 트랜잭션 범위 아 ㄴ에섬나 영속성 컨텍스트 유지
