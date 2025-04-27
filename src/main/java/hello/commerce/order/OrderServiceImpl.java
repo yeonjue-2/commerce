@@ -1,6 +1,6 @@
 package hello.commerce.order;
 
-import hello.commerce.order.dto.OrderDto;
+import hello.commerce.order.dto.OrderResponseDtoV1;
 import hello.commerce.order.dto.OrderListResponseDtoV1;
 import hello.commerce.order.model.OrderStatus;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto getOrderById(Long orderId) {
+    public OrderResponseDtoV1 getOrderById(Long orderId) {
         return null;
     }
 }

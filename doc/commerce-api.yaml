@@ -68,11 +68,11 @@ paths:
             type: integer
       responses:
         '200':
-          description: 주문 정보 조회 성공
+          description: Success
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderResponseV1"
+                $ref: "#/components/schemas/OrderResponseDtoV1"
         '400':
           description: Bad Request
           content:
@@ -83,7 +83,7 @@ paths:
                 INVALID_ORDER_ID_PARAM:
                   $ref: "#/components/examples/INVALID_ORDER_ID_PARAM"
         '404':
-          description: 해당 주문을 찾을 수 없음
+          description: Not Found
           content:
             application/json:
               schema:
@@ -122,7 +122,7 @@ components:
         example: 123
 
   schemas:
-    OrderResponseV1:
+    OrderResponseDtoV1:
       type: object
       properties:
         order_id:
@@ -168,7 +168,7 @@ components:
         orders:
           type: array
           items:
-            $ref: "#/components/schemas/OrderResponseV1"
+            $ref: "#/components/schemas/OrderResponseDtoV1"
     ErrorResponse:
       type: object
       properties:

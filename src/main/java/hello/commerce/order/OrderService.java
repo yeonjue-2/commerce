@@ -1,6 +1,6 @@
 package hello.commerce.order;
 
-import hello.commerce.order.dto.OrderDto;
+import hello.commerce.order.dto.OrderResponseDtoV1;
 import hello.commerce.order.dto.OrderListResponseDtoV1;
 import hello.commerce.order.model.OrderStatus;
 
@@ -21,6 +21,6 @@ public interface OrderService {
      * @param orderId
      * @return 주문 단건 응답
      */
-    OrderDto getOrderById(Long orderId);
+    OrderResponseDtoV1 getOrderById(Long orderId);
 
 }

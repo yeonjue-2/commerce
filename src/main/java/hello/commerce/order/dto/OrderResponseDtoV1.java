@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderDto {
+public class OrderResponseDtoV1 {
     private Long id;
     private Long userId;
     private Long productId;
@@ -24,8 +24,8 @@ public class OrderDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static OrderDto fromEntity(Order order) {
-        return OrderDto.builder()
+    public static OrderResponseDtoV1 fromEntity(Order order) {
+        return OrderResponseDtoV1.builder()
                 .id(order.getId())
                 .userId(order.getUserId())
                 .productId(order.getProductId())

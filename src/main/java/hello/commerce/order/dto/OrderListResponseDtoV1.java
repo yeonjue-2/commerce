@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class OrderListResponseDtoV1 {
-    private List<OrderDto> orders;
+    private List<OrderResponseDtoV1> orders;
     private int currentPage;
     private int totalPages;
     private long totalElements;
