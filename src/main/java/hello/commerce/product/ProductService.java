@@ -1,6 +1,7 @@
 package hello.commerce.product;
 
-import hello.commerce.product.dto.ProductListResponseV1;
+import hello.commerce.product.model.Product;
+import org.springframework.data.domain.Page;
 
 import java.awt.print.Pageable;
 
@@ -12,6 +13,6 @@ public interface ProductService {
      * @param pageable
      * @return 상품 목록 응답
      */
-    ProductListResponseV1 getProducts(Pageable pageable);
+    Page<Product> getProducts(Pageable pageable);
 
 }

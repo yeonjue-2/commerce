@@ -19,11 +19,22 @@ class ProductControllerTest {
 
     @Test
     @Disabled
-    @DisplayName("GET, return ProductListResponseV1")
+    @DisplayName("GET /v1/products - return ProductListResponseV1")
     void getProducts_success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/v1/products")
-                        .param("page", "1")
-                        .param("size", "20"))
-                .andExpect(status().isOk()); // 200 나오는지만 확인
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("GET /v1/products - 유효하지 않은 page는 400 반환")
+    void getProducts_invalidPage() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("GET /v1/products - 유효하지 않은 size는 400 반환")
+    void getProducts_invalidSize() throws Exception {
+        throw new UnsupportedOperationException();
     }
 }
