@@ -14,6 +14,33 @@ tags:
   - name: payment
     description: 결제 관련 API
 paths:
+  /v1/products:
+    get:
+      tags:
+        - product
+      summary: 전체 주문 목록 조회
+      description: 모든 주문을 페이지 단위로 조회합니다.
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/size"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListResponseDtoV1"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_PAGE:
+                  $ref: "#/components/examples/INVALID_PAGE"
+                INVALID_SIZE:
+                  $ref: "#/components/examples/INVALID_SIZE"
   /v1/orders:
     get:
       tags:
@@ -122,6 +149,29 @@ components:
         example: 123
 
   schemas:
+    ProductResponseV1:
+      type: object
+      properties:
+        product_id:
+          type: integer
+          example: 123
+        product_name:
+          type: string
+          example: 여름에도 시원한 시어서커 침구set
+        product_amount:
+          type: integer
+          example: 156000
+        stock:
+          type: integer
+          example: 200
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-04-16T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-04-16T10:00:00Z"
     OrderResponseV1:
       type: object
       properties:
@@ -159,16 +209,38 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
+    ProductListResponseDtoV1:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductResponseV1"
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 5
+        totalElements:
+          type: integer
+          example: 100
     OrderListResponseV1:
       type: object
       properties:
-        totalCount:
-          type: integer
-          example: 123
         orders:
           type: array
           items:
             $ref: "#/components/schemas/OrderResponseV1"
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 5
+        totalElements:
+          type: integer
+          example: 100
     ErrorResponse:
       type: object
       properties:
