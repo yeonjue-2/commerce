@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProductListResponseDtoV1"
+                $ref: "#/components/schemas/ProductListResponseV1"
         '400':
           description: Bad Request
           content:
@@ -42,6 +42,51 @@ paths:
                 INVALID_SIZE:
                   $ref: "#/components/examples/INVALID_SIZE"
   /v1/orders:
+    post:
+      tags:
+        - order
+      summary: 주문 생성 요청
+      description: 상품 재고 확인 후 주문을 생성합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderRequestV1"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponseV1"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_QUANTITY:
+                  $ref: "#/components/examples/INVALID_ORDER_QUANTITY"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                NOT_FOUND_PRODUCT:
+                  $ref: "#/components/examples/NOT_FOUND_PRODUCT"
+        '409':
+          description: Conflict (재고 부족)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INSUFFICIENT_STOCK:
+                  $ref: "#/components/examples/INSUFFICIENT_STOCK"
     get:
       tags:
         - order
@@ -172,6 +217,23 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
+    OrderRequestV1:
+      type: object
+      required:
+        - user_id
+        - product_id
+        - quantity
+      properties:
+        user_id:
+          type: integer
+          example: 123
+        product_id:
+          type: integer
+          example: 123
+        quantity:
+          type: integer
+          minimum: 1
+          example: 200
     OrderResponseV1:
       type: object
       properties:
@@ -209,7 +271,7 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
-    ProductListResponseDtoV1:
+    ProductListResponseV1:
       type: object
       properties:
         products:
@@ -278,6 +340,24 @@ components:
       value:
         error_code: 300002
         error_message: "파라미터 타입이 잘못되었습니다."
+        error_data: null
+    INVALID_ORDER_QUANTITY:
+      summary: 잘못된 주문 수량
+      value:
+        error_code: 300005
+        error_message: "요청 파라미터가 유효하지 않습니다. 수량은 1 이상이어야 합니다."
+        error_data: null
+    INSUFFICIENT_STOCK:
+      summary: 재고 부족
+      value:
+        error_code: 300006
+        error_message: "상품의 재고가 부족합니다."
+        error_data: null
+    NOT_FOUND_PRODUCT:
+      summary: 해당하는 상품을 찾을 수 없음
+      value:
+        error_code: 200001
+        error_message: "상품 데이터를 찾을 수 없습니다."
         error_data: null
     NOT_FOUND_ORDER:
       summary: 해당하는 주문을 찾을 수 없음
