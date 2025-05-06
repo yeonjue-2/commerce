@@ -159,6 +159,58 @@ paths:
               examples:
                 NOT_FOUND_ORDER:
                   $ref: "#/components/examples/NOT_FOUND_ORDER"
+    put:
+      tags:
+        - order
+      summary: 주문 결제 요청
+      description: |
+        주문 ID에 대해 결제를 요청합니다.  
+        결제 정보와 redirect URL을 포함해 카카오페이 결제 준비 API를 호출하고,  
+        결제 고유번호(TID) 및 리다이렉트 URL을 응답합니다.
+      parameters:
+        - $ref: "#/components/parameters/order_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderPaymentRequestV1"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderPaymentReadyResponseV1"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_ORDER_ID_PARAM:
+                  $ref: "#/components/examples/INVALID_ORDER_ID_PARAM"
+                INVALID_PAYMENT_METHOD:
+                  $ref: "#/components/examples/INVALID_PAYMENT_METHOD"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                NOT_FOUND_ORDER:
+                  $ref: "#/components/examples/NOT_FOUND_ORDER"
+        '409':
+          description: Conflict (결제 요청이 불가한 상태의 주문)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                CONFLICT_ORDER_ALREADY_CANCELLED:
+                  $ref: "#/components/examples/CONFLICT_ORDER_ALREADY_CANCELLED"
     patch:
       tags:
         - order
@@ -251,6 +303,23 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
+    ProductListResponseV1:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductResponseV1"
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 5
+        totalElements:
+          type: integer
+          example: 100
+
     OrderRequestV1:
       type: object
       required:
@@ -305,34 +374,6 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
-    UpdateOrderStatusRequestV1:
-      type: object
-      required:
-        - order_status
-      properties:
-        order_status:
-          type: string
-          enum:
-            - INITIAL
-            - PAID
-            - CANCELED
-          example: INITIAL
-    ProductListResponseV1:
-      type: object
-      properties:
-        products:
-          type: array
-          items:
-            $ref: "#/components/schemas/ProductResponseV1"
-        currentPage:
-          type: integer
-          example: 1
-        totalPages:
-          type: integer
-          example: 5
-        totalElements:
-          type: integer
-          example: 100
     OrderListResponseV1:
       type: object
       properties:
@@ -349,6 +390,66 @@ components:
         totalElements:
           type: integer
           example: 100
+    UpdateOrderStatusRequestV1:
+      type: object
+      required:
+        - order_status
+      properties:
+        order_status:
+          type: string
+          enum:
+            - INITIAL
+            - PAID
+            - CANCELED
+          example: INITIAL
+    OrderPaymentRequestV1:
+      type: object
+      required:
+        - payment_method
+        - approval_url
+        - cancel_url
+        - fail_url
+      properties:
+        payment_method:
+          type: string
+          enum:
+            - KAKAOPAY
+          example: KAKAOPAY
+        approval_url:
+          type: string
+          format: uri
+          maxLength: 255
+          example: https://yourapp.com/orders/approval
+        cancel_url:
+          type: string
+          format: uri
+          maxLength: 255
+          example: https://yourapp.com/orders/cancel
+        fail_url:
+          type: string
+          format: uri
+          maxLength: 255
+          example: https://yourapp.com/orders/
+    OrderPaymentReadyResponseV1:
+      type: object
+      properties:
+        order_id:
+          type: integer
+          example: 1234
+        tid:
+          type: string
+          description: 카카오페이 결제 고유번호
+          example: T1234567890123456789
+        kakaopay_ready_url:
+          type: string
+          format: uri
+          description: 사용자 결제 리디렉트 URL (PC/Mobile/App 환경에 맞게 선택)
+          example: https://mockup-pg-web.kakao.com/v1/xxxxx/info
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-05-01T12:34:56Z"
+
     ErrorResponse:
       type: object
       properties:
@@ -398,6 +499,18 @@ components:
       value:
         error_code: 300006
         error_message: "상품의 재고가 부족합니다."
+        error_data: null
+    INVALID_PAYMENT_METHOD:
+      summary: 유효하지 않은 결제 수단
+      value:
+        error_code: 400001
+        error_message: "지원하지 않는 결제 수단입니다. (KAKAOPAY만 허용)"
+        error_data: null
+    CONFLICT_ORDER_ALREADY_CANCELLED:
+      summary: 취소된 주문에 대한 결제 요청
+      value:
+        error_code: 400002
+        error_message: "이미 취소된 주문입니다. 결제를 요청할 수 없습니다."
         error_data: null
     NOT_FOUND_PRODUCT:
       summary: 해당하는 상품을 찾을 수 없음
