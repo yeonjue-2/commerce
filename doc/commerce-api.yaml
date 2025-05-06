@@ -99,7 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderResponseDtoV1"
+                $ref: "#/components/schemas/OrderResponseV1"
         '400':
           description: Bad Request
           content:
@@ -173,9 +173,10 @@ components:
           format: date-time
           example: "2025-04-16T10:00:00Z"
     OrderResponseDtoV1:
+    OrderResponseV1:
       type: object
       properties:
-        id:
+        order_id:
           type: integer
           example: 123
         user_id:
@@ -231,7 +232,7 @@ components:
         orders:
           type: array
           items:
-            $ref: "#/components/schemas/OrderResponseDtoV1"
+            $ref: "#/components/schemas/OrderResponseV1"
         currentPage:
           type: integer
           example: 1

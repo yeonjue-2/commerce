@@ -1,5 +1,7 @@
 package hello.commerce.common.request;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.domain.PageRequest;
@@ -10,8 +12,17 @@ import org.springframework.data.domain.Sort;
 @Setter
 public class PageRequestDto {
 
-    private int page = 1;
-    private int size = 20;
+    public static final int DEFAULT_PAGE = 1;
+    public static final int MIN_SIZE = 1;
+    public static final int DEFAULT_SIZE = 20;
+
+    @Min(DEFAULT_PAGE)
+    private int page = DEFAULT_PAGE;
+
+    @Min(MIN_SIZE)
+    @Max(DEFAULT_SIZE)
+    private int size = DEFAULT_SIZE;
+
     private String sortBy = "createdAt";
     private String sortOrder = "desc";
 

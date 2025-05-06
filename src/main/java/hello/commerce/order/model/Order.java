@@ -4,7 +4,6 @@ import hello.commerce.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 
 @Table(name = "orders")
 @Getter
@@ -37,10 +36,4 @@ public class Order extends BaseEntity {
 
     @Column(length = 512)
     private String kakaopayReadyUrl;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
 }
