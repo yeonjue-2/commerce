@@ -133,11 +133,7 @@ paths:
       summary: 주문 상세 조회
       description: 주문 ID로 주문 정보를 조회합니다.
       parameters:
-        - name: order_id
-          in: path
-          required: true
-          schema:
-            type: integer
+        - $ref: "#/components/parameters/order_id"
       responses:
         '200':
           description: Success
@@ -154,6 +150,44 @@ paths:
               examples:
                 INVALID_ORDER_ID_PARAM:
                   $ref: "#/components/examples/INVALID_ORDER_ID_PARAM"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                NOT_FOUND_ORDER:
+                  $ref: "#/components/examples/NOT_FOUND_ORDER"
+    patch:
+      tags:
+        - order
+      summary: 주문 상태 변경
+      description: 결제 승인 또는 실패 등의 이벤트에 따라 주문 상태를 수정합니다.
+      parameters:
+        - $ref: "#/components/parameters/order_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderStatusRequestV1"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponseV1"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_ORDER_STATUS:
+                  $ref: "#/components/examples/INVALID_ORDER_STATUS"
         '404':
           description: Not Found
           content:
@@ -271,6 +305,18 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
+    UpdateOrderStatusRequestV1:
+      type: object
+      required:
+        - order_status
+      properties:
+        order_status:
+          type: string
+          enum:
+            - INITIAL
+            - PAID
+            - CANCELED
+          example: INITIAL
     ProductListResponseV1:
       type: object
       properties:
@@ -330,7 +376,7 @@ components:
         error_message:  "page 당 size는 1에서 20 사이의 숫자여야 합니다."
         error_data: null
     INVALID_ORDER_STATUS:
-      summary: 존재하지 않는 주문 상태
+      summary: 유효하지 않은 주문 상태
       value:
         error_code: 300001
         error_message: "order_status 값은 INITIAL, PAID, CANCELED 중 하나여야 합니다."
