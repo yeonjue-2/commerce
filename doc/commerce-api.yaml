@@ -68,7 +68,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: 주문 정보 조회 성공
+          description: Success
           content:
             application/json:
               schema:
@@ -83,7 +83,7 @@ paths:
                 INVALID_ORDER_ID_PARAM:
                   $ref: "#/components/examples/INVALID_ORDER_ID_PARAM"
         '404':
-          description: 해당 주문을 찾을 수 없음
+          description: Not Found
           content:
             application/json:
               schema:
@@ -155,7 +155,7 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
-        modified_at:
+        updated_at:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
