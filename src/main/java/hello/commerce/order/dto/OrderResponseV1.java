@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class OrderResponseV1 {
-    private Long id;
+    private Long orderId;
     private Long userId;
     private Long productId;
     private OrderStatus orderStatus;
@@ -26,7 +26,7 @@ public class OrderResponseV1 {
 
     public static OrderResponseV1 fromEntity(Order order) {
         return OrderResponseV1.builder()
-                .id(order.getId())
+                .orderId(order.getId())
                 .userId(order.getUserId())
                 .productId(order.getProductId())
                 .orderStatus(order.getOrderStatus())

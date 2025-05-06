@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Builder
 public class ProductListResponseDtoV1 {
-    private List<ProductResponseDtoV1> products;
+    private List<ProductResponseV1> products;
     private int currentPage;
     private int totalPages;
     private long totalElements;
 
     public static ProductListResponseDtoV1 fromEntities(Page<Product> productPage) {
 
-        List<ProductResponseDtoV1> productDtos = productPage.getContent().stream()
-                .map(ProductResponseDtoV1::fromEntity)
+        List<ProductResponseV1> productDtos = productPage.getContent().stream()
+                .map(ProductResponseV1::fromEntity)
                 .collect(Collectors.toList());
 
         return ProductListResponseDtoV1.builder()
