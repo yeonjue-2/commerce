@@ -1,7 +1,7 @@
 package hello.commerce.order;
 
 import hello.commerce.common.request.PageRequestDto;
-import hello.commerce.order.dto.OrderResponseDtoV1;
+import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.dto.OrderListResponseDtoV1;
 import hello.commerce.order.model.OrderStatus;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class OrderController {
     }
 
     @GetMapping("/v1/orders/{order_id}")
-    public ResponseEntity<OrderResponseDtoV1> getOrderById(@PathVariable("order_id") Long orderId) {
+    public ResponseEntity<OrderResponseV1> getOrderById(@PathVariable("order_id") Long orderId) {
         // TO-DO 주문 상세 조회 서비스 호출
         throw new UnsupportedOperationException("Not implemented yet");
     }

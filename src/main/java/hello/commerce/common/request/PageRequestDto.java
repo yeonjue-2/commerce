@@ -12,12 +12,16 @@ import org.springframework.data.domain.Sort;
 @Setter
 public class PageRequestDto {
 
-    @Min(1)
-    private int page = 1;
+    public static final int DEFAULT_PAGE = 1;
+    public static final int MIN_SIZE = 1;
+    public static final int DEFAULT_SIZE = 20;
 
-    @Min(1)
-    @Max(20)
-    private int size = 20;
+    @Min(DEFAULT_PAGE)
+    private int page = DEFAULT_PAGE;
+
+    @Min(MIN_SIZE)
+    @Max(DEFAULT_SIZE)
+    private int size = DEFAULT_SIZE;
 
     private String sortBy = "createdAt";
     private String sortOrder = "desc";
