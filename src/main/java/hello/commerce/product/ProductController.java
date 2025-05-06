@@ -1,7 +1,7 @@
 package hello.commerce.product;
 
 import hello.commerce.common.request.PageRequestDto;
-import hello.commerce.product.dto.ProductListResponseDtoV1;
+import hello.commerce.product.dto.ProductListResponseV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProductController {
 
     @GetMapping("/v1/products")
-    public ResponseEntity<ProductListResponseDtoV1> getProducts(
+    public ResponseEntity<ProductListResponseV1> getProducts(
             @Validated @ModelAttribute PageRequestDto pageRequestDto
     ) {
         Pageable pageable = pageRequestDto.toPageable();
