@@ -3,26 +3,33 @@ package hello.commerce.order;
 import hello.commerce.common.request.PageRequestDto;
 import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.dto.OrderListResponseV1;
+import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping
 public class OrderController {
 
+    private final OrderService orderService;
+
     @GetMapping("/v1/orders")
     public ResponseEntity<OrderListResponseV1> getOrders(
-            @Validated @ModelAttribute PageRequestDto pageRequestDto,
-            @RequestParam(value = "order_status", required = false)OrderStatus orderStatus
+            @Valid @ModelAttribute PageRequestDto pageRequestDto,
+            @RequestParam(value = "order_status", required = false) OrderStatus orderStatus
     ) {
         Pageable pageable = pageRequestDto.toPageable();
-        // TO-D0 주문 목록 조회 서비스 호출
-        throw new UnsupportedOperationException("Not implemented yet");
+        Page<Order> page = orderService.getOrders(pageable, orderStatus);
+        OrderListResponseV1 response = OrderListResponseV1.fromEntities(page);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/v1/orders/{order_id}")
