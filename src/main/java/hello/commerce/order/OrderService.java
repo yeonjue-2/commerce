@@ -3,7 +3,7 @@ package hello.commerce.order;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import org.springframework.data.domain.Page;
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
 
 public interface OrderService {
 

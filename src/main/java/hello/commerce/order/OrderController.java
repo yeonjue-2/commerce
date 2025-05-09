@@ -2,7 +2,7 @@ package hello.commerce.order;
 
 import hello.commerce.common.request.PageRequestDto;
 import hello.commerce.order.dto.OrderResponseV1;
-import hello.commerce.order.dto.OrderListResponseDtoV1;
+import hello.commerce.order.dto.OrderListResponseV1;
 import hello.commerce.order.model.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     @GetMapping("/v1/orders")
-    public ResponseEntity<OrderListResponseDtoV1> getOrders(
+    public ResponseEntity<OrderListResponseV1> getOrders(
             @Validated @ModelAttribute PageRequestDto pageRequestDto,
             @RequestParam(value = "order_status", required = false)OrderStatus orderStatus
     ) {

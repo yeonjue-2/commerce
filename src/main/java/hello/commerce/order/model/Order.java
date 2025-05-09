@@ -1,6 +1,8 @@
 package hello.commerce.order.model;
 
 import hello.commerce.common.model.BaseEntity;
+import hello.commerce.product.model.Product;
+import hello.commerce.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,11 +20,13 @@ public class Order extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    private User user;
 
-    @Column(name = "product_id", nullable = false)
-    private Long productId;
+    @JoinColumn(name = "product_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    private Product product;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
