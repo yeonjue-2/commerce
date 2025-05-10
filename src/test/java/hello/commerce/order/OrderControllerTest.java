@@ -76,8 +76,8 @@ class OrderControllerTest {
                         .param("page", "0") // 잘못된 값
                         .param("size", "10"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error_code").value(100001))
-                .andExpect(jsonPath("$.error_message").exists());
+                .andExpect(jsonPath("$.error_code").value(ErrorCode.INVALID_PAGE.getCode()))
+                .andExpect(jsonPath("$.error_message").value(ErrorCode.INVALID_PAGE.getMessage()));
     }
 
     @Test
@@ -87,8 +87,8 @@ class OrderControllerTest {
                         .param("page", "1")
                         .param("size", "1000")) // 잘못된 값
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error_code").value(100002))
-                .andExpect(jsonPath("$.error_message").exists());
+                .andExpect(jsonPath("$.error_code").value(ErrorCode.INVALID_SIZE.getCode()))
+                .andExpect(jsonPath("$.error_message").value(ErrorCode.INVALID_SIZE.getMessage()));
     }
 
     @Test
