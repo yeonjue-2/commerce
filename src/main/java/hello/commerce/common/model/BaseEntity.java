@@ -3,10 +3,12 @@ package hello.commerce.common.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @MappedSuperclass
+@Setter
 @Getter
 public abstract class BaseEntity {
 
