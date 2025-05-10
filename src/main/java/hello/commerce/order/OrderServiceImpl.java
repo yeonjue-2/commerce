@@ -1,5 +1,7 @@
 package hello.commerce.order;
 
+import hello.commerce.common.model.BusinessException;
+import hello.commerce.common.model.ErrorCode;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getOrderById(Long orderId) {
-        return null;
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
     }
 }

@@ -34,7 +34,10 @@ public class OrderController {
 
     @GetMapping("/v1/orders/{order_id}")
     public ResponseEntity<OrderResponseV1> getOrderById(@PathVariable("order_id") Long orderId) {
-        // TO-DO 주문 상세 조회 서비스 호출
-        throw new UnsupportedOperationException("Not implemented yet");
+
+        Order orderById = orderService.getOrderById(orderId);
+        OrderResponseV1 response = OrderResponseV1.fromEntity(orderById);
+
+        return ResponseEntity.ok(response);
     }
 }
