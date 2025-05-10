@@ -1,6 +1,8 @@
 package hello.commerce.order;
 
 import hello.commerce.common.error.GlobalExceptionHandler;
+import hello.commerce.common.model.BusinessException;
+import hello.commerce.common.model.ErrorCode;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.model.Product;
@@ -49,7 +51,6 @@ class OrderControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("GET /v1/orders - 정상 요청 시 200 OK")
     void getOrders_success() throws Exception {
         // given
@@ -69,7 +70,6 @@ class OrderControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("GET /v1/orders - 유효하지 않은 page는 400 반환")
     void getOrders_invalidPage() throws Exception {
         mockMvc.perform(get("/v1/orders")
@@ -81,7 +81,6 @@ class OrderControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("GET /v1/orders - 유효하지 않은 size는 400 반환")
     void getOrders_invalidSize() throws Exception {
         mockMvc.perform(get("/v1/orders")
@@ -93,24 +92,41 @@ class OrderControllerTest {
     }
 
     @Test
-    @Disabled
-    @DisplayName("GET /v1/orders/{order_id} - return OrderDto")
+    @DisplayName("GET /v1/orders/{order_id} - 정상 요청 시 200 OK")
     void getOrderById_success() throws Exception {
-        throw new UnsupportedOperationException();
+        // given
+        Order order = createOrder(100L);
+        when(orderService.getOrderById(any())).thenReturn(order);
+
+        // when & then
+        mockMvc.perform(get("/v1/orders/{order_id}", order.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orderId").value(order.getId()))
+                .andExpect(jsonPath("$.orderStatus").value(order.getOrderStatus().name()));
     }
 
     @Test
-    @Disabled
-    @DisplayName("GET /v1/orders/{order_id} - 유효하지 않은 order_id는 400 반환")
+    @DisplayName("GET /v1/orders/{order_id} - 파라미터 타입이 잘못되면 400 반환")
     void getOrderById_invalidOrderIdParam() throws Exception {
-        throw new UnsupportedOperationException();
+        mockMvc.perform(get("/v1/orders/{order_id}", "abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error_code").value(ErrorCode.INVALID_ORDER_ID_PARAM.getCode()))
+                .andExpect(jsonPath("$.error_message").value(ErrorCode.INVALID_ORDER_ID_PARAM.getMessage()));
     }
 
     @Test
-    @Disabled
+//    @Disabled
     @DisplayName("GET /v1/orders/{order_id} - order 데이터를 찾을 수 없으면 404 반환")
     void getOrderById_notFoundOrder() throws Exception {
-        throw new UnsupportedOperationException();
+        // given
+        when(orderService.getOrderById(999L))
+                .thenThrow(new BusinessException(ErrorCode.NOT_FOUND_ORDER));
+
+        // when & then
+        mockMvc.perform(get("/v1/orders/{order_id}", 999L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error_code").value(ErrorCode.NOT_FOUND_ORDER.getCode()))
+                .andExpect(jsonPath("$.error_message").value(ErrorCode.NOT_FOUND_ORDER.getMessage()));
     }
 
     private Order createOrder(Long id) {
