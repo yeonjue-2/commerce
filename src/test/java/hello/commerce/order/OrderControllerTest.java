@@ -8,7 +8,6 @@ import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.model.Product;
 import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +114,6 @@ class OrderControllerTest {
     }
 
     @Test
-//    @Disabled
     @DisplayName("GET /v1/orders/{order_id} - order 데이터를 찾을 수 없으면 404 반환")
     void getOrderById_notFoundOrder() throws Exception {
         // given
