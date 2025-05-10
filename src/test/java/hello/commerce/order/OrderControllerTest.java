@@ -50,7 +50,6 @@ class OrderControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("GET /v1/orders - 정상 요청 시 200 OK")
     void getOrders_success() throws Exception {
         // given
@@ -70,7 +69,6 @@ class OrderControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("GET /v1/orders - 유효하지 않은 page는 400 반환")
     void getOrders_invalidPage() throws Exception {
         mockMvc.perform(get("/v1/orders")
@@ -82,7 +80,6 @@ class OrderControllerTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("GET /v1/orders - 유효하지 않은 size는 400 반환")
     void getOrders_invalidSize() throws Exception {
         mockMvc.perform(get("/v1/orders")

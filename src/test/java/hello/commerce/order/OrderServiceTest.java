@@ -5,6 +5,7 @@ import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.model.Product;
 import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,6 +39,7 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("getOrderById 성공, OrderStatus 파라미터 포함)")
     void getOrders_successWithOrderStatus() {
         // given
         OrderStatus filter = OrderStatus.PAID;
@@ -56,6 +58,7 @@ public class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("getOrderById 성공, OrderStatus 파라미터 포함 X)")
     void getOrders_successWithNoOrderStatus() {
         // given
         PageRequest pageable = PageRequest.of(0, 10);
@@ -69,7 +72,7 @@ public class OrderServiceTest {
 
         // then
         assertThat(result.getContent()).hasSize(2);
-        assertThat(result.getContent().get(1).getId()).isEqualTo(10L);
+        assertThat(result.getContent().get(1).getId()).isEqualTo(101L);
     }
 
 
