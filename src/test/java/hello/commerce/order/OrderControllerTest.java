@@ -16,8 +16,29 @@ class OrderControllerTest {
 
     @Test
     @Disabled
-    @DisplayName("GET /v1/orders - return OrderListResponseV1")
-    void getOrders_success() throws Exception {
+    @DisplayName("POST /v1/orders - 성공 시 201 Created")
+    void createOrder_success() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("POST /v1/orders - 유효하지 않은 주문 수량 400 Bad Request")
+    void getOrders_invalidOrderQuantity() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("POST /v1/orders - 존재하지 않는 상품 404 Not Found")
+    void createOrder_notFoundProduct() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("POST /v1/orders - 재고 부족 409 Conflict")
+    void createOrder_insufficientStock() throws Exception {
         throw new UnsupportedOperationException();
     }
 

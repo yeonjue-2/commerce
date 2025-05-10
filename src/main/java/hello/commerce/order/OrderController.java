@@ -1,9 +1,12 @@
 package hello.commerce.order;
 
 import hello.commerce.common.request.PageRequestDto;
+import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.dto.OrderListResponseDtoV1;
+import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +18,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping
 public class OrderController {
 
+    @PostMapping("/v1/orders")
+    public ResponseEntity<OrderResponseV1> createOrders(@Valid @RequestBody OrderRequestV1 request) {
+        // TO-D0 주문 생성 서비스 호출
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
     @GetMapping("/v1/orders")
     public ResponseEntity<OrderListResponseDtoV1> getOrders(
-            @Validated @ModelAttribute PageRequestDto pageRequestDto,
+            @Valid @ModelAttribute PageRequestDto pageRequestDto,
             @RequestParam(value = "order_status", required = false)OrderStatus orderStatus
     ) {
         Pageable pageable = pageRequestDto.toPageable();
