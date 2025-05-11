@@ -68,7 +68,7 @@ public class OrderServiceTest {
         when(orderRepository.findAll(pageable)).thenReturn(page);
 
         // when
-        Page<Order> result = orderService.getOrders(pageable, null);
+        Page<Order> result = orderService.getOrders(pageable);
 
         // then
         assertThat(result.getContent()).hasSize(2);

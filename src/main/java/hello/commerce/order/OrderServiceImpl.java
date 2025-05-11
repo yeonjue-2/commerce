@@ -16,9 +16,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<Order> getOrders(Pageable pageable, OrderStatus orderStatus) {
-        return (orderStatus != null)
-                ? orderRepository.findAllByOrderStatus(pageable, orderStatus)
-                : orderRepository.findAll(pageable);
+        return orderRepository.findAllByOrderStatus(pageable, orderStatus);
+    }
+
+    @Override
+    public Page<Order> getOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable);
     }
 
     @Override
