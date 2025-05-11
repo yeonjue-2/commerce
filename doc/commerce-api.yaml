@@ -287,7 +287,7 @@ components:
             - PAID
             - CANCELED
           example: INITIAL
-        total_price:
+        total_amount:
           type: integer
           example: 53000
         quantity:
@@ -309,6 +309,7 @@ components:
       type: object
       required:
         - order_status
+        - total_amount
       properties:
         order_status:
           type: string
@@ -317,6 +318,9 @@ components:
             - PAID
             - CANCELED
           example: INITIAL
+        total_amount:
+          type: integer
+          example: 53000
     ProductListResponseV1:
       type: object
       properties:
