@@ -22,40 +22,42 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
+    public ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException ex) {
         ErrorCode code = ex.getErrorCode();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(code.getCode(), code.getMessage(), null));
     }
 
-
-    // @ModelAttribute는 원래 BindException을 발생시켜야 맞지만,
-    // 컨트롤러 파라미터에서 @Valid가 붙으면 상황에 따라 MethodArgumentNotValidException이 발생할 수 있어 함께처리
     // 1. @Valid, @RequestBody 검증 실패
-    @ExceptionHandler({BindException.class, MethodArgumentNotValidException.class})
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(Exception ex) {
+    public ErrorResponse handleValidationException(final MethodArgumentNotValidException ex) {
 
-        BindingResult bindingResult = ex instanceof BindException
-                ? ((BindException) ex).getBindingResult()
-                : ((MethodArgumentNotValidException) ex).getBindingResult();
-
-        FieldError fieldError = bindingResult.getFieldError();
+        FieldError fieldError = ex.getBindingResult().getFieldError();
         String field = fieldError.getField();
 
-        ErrorCode code = switch (field) {
-            case "page" -> ErrorCode.INVALID_PAGE;
-            case "size" -> ErrorCode.INVALID_SIZE;
-            default -> ErrorCode.INVALID_ARGUMENT;
-        };
-
+        ErrorCode code = null;
+        
+        if ("page".equals(field)) {
+            code = ErrorCode.INVALID_PAGE;
+        } else if ("size".equals(field)) {
+            code = ErrorCode.INVALID_SIZE;
+        }
+        
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
 
-    // 2. 기타 모든 예외
+    @ExceptionHandler(BindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBindException(final BindException ex) {
+        ErrorCode code = ErrorCode.INVALID_ARGUMENT;
+        return new ErrorResponse(code.getCode(), code.getMessage(), null);
+    }
+
+    // 기타 모든 예외
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleUnexpected(Exception ex) {
+    public ErrorResponse handleUnexpected(final Exception ex) {
         ErrorCode code = ErrorCode.INTERNAL_SERVER_ERROR;
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
