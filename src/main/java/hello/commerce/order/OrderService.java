@@ -14,6 +14,7 @@ public interface OrderService {
      * @return 주문 목록 응답
      */
     Page<Order> getOrders(Pageable pageable, OrderStatus orderStatus);
+    Page<Order> getOrders(Pageable pageable);
 
     /**
      * 주문 상세 조회

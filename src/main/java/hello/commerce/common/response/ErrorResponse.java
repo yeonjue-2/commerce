@@ -10,13 +10,13 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ErrorResponse {
-    private int error_code;
-    private String error_message;
-    private Map<String, Object> error_data;
+    private int errorCode;
+    private String errorMessage;
+    private Map<String, Object> errorData;
 
-    public ErrorResponse(int errorCode, String message) {
-        this.error_code = errorCode;
-        this.error_message = message;
-        this.error_data = null;
+    public ErrorResponse(int errorCode, String errorMessage) {
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+        this.errorData = null;
     }
 }

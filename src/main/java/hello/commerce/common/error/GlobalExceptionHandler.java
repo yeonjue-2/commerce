@@ -29,31 +29,34 @@ public class GlobalExceptionHandler {
     }
 
 
-    // @ModelAttribute는 원래 BindException을 발생시켜야 맞지만,
-    // 컨트롤러 파라미터에서 @Valid가 붙으면 상황에 따라 MethodArgumentNotValidException이 발생할 수 있어 함께처리
-    // 1. @Valid, @RequestBody 검증 실패
-    @ExceptionHandler({BindException.class, MethodArgumentNotValidException.class})
+    // @Valid, @RequestBody 검증 실패
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(Exception ex) {
+    public ErrorResponse handleValidationException(final MethodArgumentNotValidException ex) {
 
-        BindingResult bindingResult = ex instanceof BindException
-                ? ((BindException) ex).getBindingResult()
-                : ((MethodArgumentNotValidException) ex).getBindingResult();
-
-        FieldError fieldError = bindingResult.getFieldError();
+        FieldError fieldError = ex.getBindingResult().getFieldError();
         String field = fieldError.getField();
 
-        ErrorCode code = switch (field) {
-            case "page" -> ErrorCode.INVALID_PAGE;
-            case "size" -> ErrorCode.INVALID_SIZE;
-            default -> ErrorCode.INVALID_ARGUMENT;
-        };
+        ErrorCode code = null;
+
+        if ("page".equals(field)) {
+            code = ErrorCode.INVALID_PAGE;
+        } else if ("size".equals(field)) {
+            code = ErrorCode.INVALID_SIZE;
+        }
 
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
 
+    @ExceptionHandler(BindException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBindException(final BindException ex) {
+        ErrorCode code = ErrorCode.INVALID_ARGUMENT;
+        return new ErrorResponse(code.getCode(), code.getMessage(), null);
+    }
 
-    // 2. @RequestParam, @PathVariable 타입 불일치
+
+    // @RequestParam, @PathVariable 타입 불일치
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
@@ -67,21 +70,7 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
 
-    // 3. 필수 요청 파라미터 누락 (예: ?size= 빠진 경우)
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMissingParam(MissingServletRequestParameterException ex) {
-        return new ErrorResponse(100098, "필수 요청 파라미터가 없습니다: " + ex.getParameterName(), null);
-    }
-
-    // 4. 요청 URL이 없음 (예: 잘못된 경로 요청)
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNoHandler(NoHandlerFoundException ex) {
-        return new ErrorResponse(100097, "요청한 리소스를 찾을 수 없습니다.", null);
-    }
-
-    // 2. 기타 모든 예외
+    // 기타 모든 예외
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnexpected(Exception ex) {

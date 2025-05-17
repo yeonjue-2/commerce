@@ -26,10 +26,12 @@ public class OrderController {
             @RequestParam(value = "order_status", required = false) OrderStatus orderStatus
     ) {
         Pageable pageable = pageRequestDto.toPageable();
-        Page<Order> page = orderService.getOrders(pageable, orderStatus);
-        OrderListResponseV1 response = OrderListResponseV1.fromEntities(page);
+        Page<Order> page = (orderStatus != null)
+                ? orderService.getOrders(pageable, orderStatus)
+                : orderService.getOrders(pageable);
+        OrderListResponseV1 orderListResponseV1 = OrderListResponseV1.fromEntities(page);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(orderListResponseV1);
     }
 
     @GetMapping("/v1/orders/{order_id}")

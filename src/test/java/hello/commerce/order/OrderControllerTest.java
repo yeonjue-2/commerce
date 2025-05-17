@@ -50,13 +50,33 @@ class OrderControllerTest {
     }
 
     @Test
-    @DisplayName("GET /v1/orders - 정상 요청 시 200 OK")
-    void getOrders_success() throws Exception {
+    @DisplayName("GET /v1/orders - 정상 요청 시 200 OK (orderStatus 파라미터 O)")
+    void getOrders_successWithOrderStatus() throws Exception {
         // given
         Order order1 = createOrder(100L);
         Page<Order> page = new PageImpl<>(List.of(order1), PageRequest.of(0, 20), 1);
 
-        when(orderService.getOrders(any(), any())).thenReturn(page);
+        when(orderService.getOrders(any(), eq(OrderStatus.PAID))).thenReturn(page);
+
+        // when & then
+        mockMvc.perform(get("/v1/orders")
+                        .param("page", "1")
+                        .param("size", "20")
+                        .param("order_status", "PAID"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orders[0].orderId").value(100))
+                .andExpect(jsonPath("$.orders[0].quantity").value(2))
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    @DisplayName("GET /v1/orders - 정상 요청 시 200 OK (orderStatus 파라미터 X)")
+    void getOrders_successWithNoParameter() throws Exception {
+        // given
+        Order order1 = createOrder(100L);
+        Page<Order> page = new PageImpl<>(List.of(order1), PageRequest.of(0, 20), 1);
+
+        when(orderService.getOrders(any())).thenReturn(page);
 
         // when & then
         mockMvc.perform(get("/v1/orders")
@@ -75,8 +95,8 @@ class OrderControllerTest {
                         .param("page", "0") // 잘못된 값
                         .param("size", "10"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error_code").value(ErrorCode.INVALID_PAGE.getCode()))
-                .andExpect(jsonPath("$.error_message").value(ErrorCode.INVALID_PAGE.getMessage()));
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.INVALID_PAGE.getCode()))
+                .andExpect(jsonPath("$.errorMessage").value(ErrorCode.INVALID_PAGE.getMessage()));
     }
 
     @Test
@@ -86,8 +106,8 @@ class OrderControllerTest {
                         .param("page", "1")
                         .param("size", "1000")) // 잘못된 값
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error_code").value(ErrorCode.INVALID_SIZE.getCode()))
-                .andExpect(jsonPath("$.error_message").value(ErrorCode.INVALID_SIZE.getMessage()));
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.INVALID_SIZE.getCode()))
+                .andExpect(jsonPath("$.errorMessage").value(ErrorCode.INVALID_SIZE.getMessage()));
     }
 
     @Test
@@ -109,8 +129,8 @@ class OrderControllerTest {
     void getOrderById_invalidOrderIdParam() throws Exception {
         mockMvc.perform(get("/v1/orders/{order_id}", "abc"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error_code").value(ErrorCode.INVALID_ORDER_ID_PARAM.getCode()))
-                .andExpect(jsonPath("$.error_message").value(ErrorCode.INVALID_ORDER_ID_PARAM.getMessage()));
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.INVALID_ORDER_ID_PARAM.getCode()))
+                .andExpect(jsonPath("$.errorMessage").value(ErrorCode.INVALID_ORDER_ID_PARAM.getMessage()));
     }
 
     @Test
@@ -123,8 +143,8 @@ class OrderControllerTest {
         // when & then
         mockMvc.perform(get("/v1/orders/{order_id}", 999L))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error_code").value(ErrorCode.NOT_FOUND_ORDER.getCode()))
-                .andExpect(jsonPath("$.error_message").value(ErrorCode.NOT_FOUND_ORDER.getMessage()));
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.NOT_FOUND_ORDER.getCode()))
+                .andExpect(jsonPath("$.errorMessage").value(ErrorCode.NOT_FOUND_ORDER.getMessage()));
     }
 
     private Order createOrder(Long id) {
