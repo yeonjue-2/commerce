@@ -21,7 +21,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
+    public ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException ex) {
         ErrorCode code = ex.getErrorCode();
         return ResponseEntity
                 .status(code.getStatus())
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
     // @RequestParam, @PathVariable 타입 불일치
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+    public ErrorResponse handleTypeMismatchException(final MethodArgumentTypeMismatchException ex) {
         String paramName = ex.getName();
 
         ErrorCode code = switch (paramName) {
@@ -70,10 +70,25 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
 
+
+    // 필수 요청 파라미터 누락 (예: ?size= 빠진 경우)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMissingParam(final MissingServletRequestParameterException ex) {
+        return new ErrorResponse(100098, "필수 요청 파라미터가 없습니다: " + ex.getParameterName(), null);
+    }
+
+    // 요청 URL이 없음 (예: 잘못된 경로 요청)
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoHandler(final NoHandlerFoundException ex) {
+        return new ErrorResponse(100097, "요청한 리소스를 찾을 수 없습니다.", null);
+    }
+
     // 기타 모든 예외
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleUnexpected(Exception ex) {
+    public ErrorResponse handleUnexpected(final Exception ex) {
         ErrorCode code = ErrorCode.INTERNAL_SERVER_ERROR;
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }

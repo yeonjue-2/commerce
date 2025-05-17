@@ -1,5 +1,5 @@
 {
-  "error_code": 300002,
-  "error_message": "파라미터 타입이 잘못되었습니다.",
-  "error_data": null
+  "errorCode": 300002,
+  "errorMessage": "파라미터 타입이 잘못되었습니다.",
+  "errorData": null
 }
