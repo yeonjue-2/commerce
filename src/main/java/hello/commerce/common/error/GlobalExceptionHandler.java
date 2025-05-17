@@ -21,14 +21,15 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException ex) {
         ErrorCode code = ex.getErrorCode();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity
+                .status(code.getStatus())
                 .body(new ErrorResponse(code.getCode(), code.getMessage(), null));
     }
 
-    // 1. @Valid, @RequestBody 검증 실패
+
+    // @Valid, @RequestBody 검증 실패
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationException(final MethodArgumentNotValidException ex) {
@@ -37,13 +38,13 @@ public class GlobalExceptionHandler {
         String field = fieldError.getField();
 
         ErrorCode code = null;
-        
+
         if ("page".equals(field)) {
             code = ErrorCode.INVALID_PAGE;
         } else if ("size".equals(field)) {
             code = ErrorCode.INVALID_SIZE;
         }
-        
+
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
 
@@ -52,6 +53,36 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleBindException(final BindException ex) {
         ErrorCode code = ErrorCode.INVALID_ARGUMENT;
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
+    }
+
+
+    // @RequestParam, @PathVariable 타입 불일치
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleTypeMismatchException(final MethodArgumentTypeMismatchException ex) {
+        String paramName = ex.getName();
+
+        ErrorCode code = switch (paramName) {
+            case "order_id" -> ErrorCode.INVALID_ORDER_ID_PARAM;
+            default -> ErrorCode.INVALID_ARGUMENT;
+        };
+
+        return new ErrorResponse(code.getCode(), code.getMessage(), null);
+    }
+
+
+    // 필수 요청 파라미터 누락 (예: ?size= 빠진 경우)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMissingParam(final MissingServletRequestParameterException ex) {
+        return new ErrorResponse(100098, "필수 요청 파라미터가 없습니다: " + ex.getParameterName(), null);
+    }
+
+    // 요청 URL이 없음 (예: 잘못된 경로 요청)
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNoHandler(final NoHandlerFoundException ex) {
+        return new ErrorResponse(100097, "요청한 리소스를 찾을 수 없습니다.", null);
     }
 
     // 기타 모든 예외

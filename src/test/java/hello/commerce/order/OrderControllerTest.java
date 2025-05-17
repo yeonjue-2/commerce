@@ -1,13 +1,13 @@
 package hello.commerce.order;
 
 import hello.commerce.common.error.GlobalExceptionHandler;
+import hello.commerce.common.model.BusinessException;
 import hello.commerce.common.model.ErrorCode;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.model.Product;
 import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,24 +111,40 @@ class OrderControllerTest {
     }
 
     @Test
-    @Disabled
-    @DisplayName("GET /v1/orders/{order_id} - return OrderDto")
+    @DisplayName("GET /v1/orders/{order_id} - 정상 요청 시 200 OK")
     void getOrderById_success() throws Exception {
-        throw new UnsupportedOperationException();
+        // given
+        Order order = createOrder(100L);
+        when(orderService.getOrderById(any())).thenReturn(order);
+
+        // when & then
+        mockMvc.perform(get("/v1/orders/{order_id}", order.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orderId").value(order.getId()))
+                .andExpect(jsonPath("$.orderStatus").value(order.getOrderStatus().name()));
     }
 
     @Test
-    @Disabled
-    @DisplayName("GET /v1/orders/{order_id} - 유효하지 않은 order_id는 400 반환")
+    @DisplayName("GET /v1/orders/{order_id} - 파라미터 타입이 잘못되면 400 반환")
     void getOrderById_invalidOrderIdParam() throws Exception {
-        throw new UnsupportedOperationException();
+        mockMvc.perform(get("/v1/orders/{order_id}", "abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.INVALID_ORDER_ID_PARAM.getCode()))
+                .andExpect(jsonPath("$.errorMessage").value(ErrorCode.INVALID_ORDER_ID_PARAM.getMessage()));
     }
 
     @Test
-    @Disabled
     @DisplayName("GET /v1/orders/{order_id} - order 데이터를 찾을 수 없으면 404 반환")
     void getOrderById_notFoundOrder() throws Exception {
-        throw new UnsupportedOperationException();
+        // given
+        when(orderService.getOrderById(999L))
+                .thenThrow(new BusinessException(ErrorCode.NOT_FOUND_ORDER));
+
+        // when & then
+        mockMvc.perform(get("/v1/orders/{order_id}", 999L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.NOT_FOUND_ORDER.getCode()))
+                .andExpect(jsonPath("$.errorMessage").value(ErrorCode.NOT_FOUND_ORDER.getMessage()));
     }
 
     private Order createOrder(Long id) {

@@ -1,5 +1,5 @@
 {
-  "error_code": 100002,
-  "error_message": "page 당 size는 1에서 20 사이의 숫자여야 합니다.",
-  "error_data": null
+  "errorCode": 100002,
+  "errorMessage": "page 당 size는 1에서 20 사이의 숫자여야 합니다.",
+  "errorData": null
 }
