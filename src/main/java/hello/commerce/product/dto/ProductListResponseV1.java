@@ -14,19 +14,19 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductListResponseDtoV1 {
+public class ProductListResponseV1 {
     private List<ProductResponseV1> products;
     private int currentPage;
     private int totalPages;
     private long totalElements;
 
-    public static ProductListResponseDtoV1 fromEntities(Page<Product> productPage) {
+    public static ProductListResponseV1 fromEntities(Page<Product> productPage) {
 
         List<ProductResponseV1> productDtos = productPage.getContent().stream()
                 .map(ProductResponseV1::fromEntity)
                 .collect(Collectors.toList());
 
-        return ProductListResponseDtoV1.builder()
+        return ProductListResponseV1.builder()
                 .products(productDtos)
                 .currentPage(productPage.getNumber() + 1)
                 .totalPages(productPage.getTotalPages())

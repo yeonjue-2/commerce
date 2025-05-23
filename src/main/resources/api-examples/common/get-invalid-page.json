@@ -1,0 +1,5 @@
+{
+  "errorCode": 100001,
+  "errorMessage": "page는 1 이상의 숫자여야 합니다.",
+  "errorData": null
+}
