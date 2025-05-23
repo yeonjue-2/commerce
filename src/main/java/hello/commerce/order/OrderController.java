@@ -8,6 +8,7 @@ import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +20,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping
 public class OrderController {
 
+    @Autowired
+    private final OrderService orderService;
+
     @PostMapping("/v1/orders")
     public ResponseEntity<OrderResponseV1> createOrders(@Valid @RequestBody OrderRequestV1 request) {
         // TO-D0 주문 생성 서비스 호출
         throw new UnsupportedOperationException("Not implemented yet");
     }
-
-    private final OrderService orderService;
 
     @GetMapping("/v1/orders")
     public ResponseEntity<OrderListResponseV1> getOrders(

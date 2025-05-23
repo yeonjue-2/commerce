@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,6 +37,9 @@ class OrderControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    OrderService orderService;
 
     User user;
     Product product;
@@ -73,6 +77,26 @@ class OrderControllerTest {
     @DisplayName("POST /v1/orders - 재고 부족 409 Conflict")
     void createOrder_insufficientStock() throws Exception {
         throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @DisplayName("GET /v1/orders - 정상 요청 시 200 OK (orderStatus 파라미터 O)")
+    void getOrders_successWithOrderStatus() throws Exception {
+        // given
+        Order order1 = createOrder(100L);
+        Page<Order> page = new PageImpl<>(List.of(order1), PageRequest.of(0, 20), 1);
+
+        when(orderService.getOrders(any(), eq(OrderStatus.PAID))).thenReturn(page);
+
+        // when & then
+        mockMvc.perform(get("/v1/orders")
+                        .param("page", "1")
+                        .param("size", "20")
+                        .param("order_status", "PAID"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.orders[0].orderId").value(100))
+                .andExpect(jsonPath("$.orders[0].quantity").value(2))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
