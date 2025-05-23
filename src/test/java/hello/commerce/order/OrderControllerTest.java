@@ -8,6 +8,7 @@ import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.model.Product;
 import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class OrderControllerTest {
 
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @MockBean
     OrderService orderService;
@@ -47,6 +48,35 @@ class OrderControllerTest {
     void setUp() {
         user = new User(100L, "nonamed");
         product = new Product(100L, "향균 베개 커버", 35000, 200);
+    }
+
+
+    @Test
+    @Disabled
+    @DisplayName("POST /v1/orders - 성공 시 201 Created")
+    void createOrder_success() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("POST /v1/orders - 유효하지 않은 주문 수량 400 Bad Request")
+    void getOrders_invalidOrderQuantity() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("POST /v1/orders - 존재하지 않는 상품 404 Not Found")
+    void createOrder_notFoundProduct() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("POST /v1/orders - 재고 부족 409 Conflict")
+    void createOrder_insufficientStock() throws Exception {
+        throw new UnsupportedOperationException();
     }
 
     @Test
