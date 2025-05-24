@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -24,9 +26,13 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/v1/orders")
-    public ResponseEntity<OrderResponseV1> createOrders(@Valid @RequestBody OrderRequestV1 request) {
-        // TO-D0 주문 생성 서비스 호출
-        throw new UnsupportedOperationException("Not implemented yet");
+    public ResponseEntity<OrderResponseV1> createOrder(@Valid @RequestBody OrderRequestV1 orderRequest) {
+        Order order = orderService.createOrder(orderRequest);
+        OrderResponseV1 orderResponseV1 = OrderResponseV1.fromEntity(order);
+
+        // 주문 생성 후 redirect URI 생성
+        URI location = URI.create("/v1/orders/" + order.getId());
+        return ResponseEntity.created(location).body(orderResponseV1);
     }
 
     @GetMapping("/v1/orders")

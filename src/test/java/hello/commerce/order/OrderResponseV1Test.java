@@ -44,7 +44,7 @@ public class OrderResponseV1Test {
     private Order createOrder(Long id) {
         Order order = Order.builder()
                 .id(id)
-                .user(user)
+                .userId(user.getId())
                 .product(product)
                 .orderStatus(OrderStatus.PAID)
                 .quantity(2)

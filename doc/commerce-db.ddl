@@ -11,8 +11,8 @@ create table users
 (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
     username    VARCHAR(50)   NOT NULL,
-    created_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at  DATETIME      NOT NULL,
+    updated_at  DATETIME      NOT NULL
 );
 
 -- 상품 테이블
@@ -22,8 +22,8 @@ create table products
     name        VARCHAR(100)  NOT NULL,
     amount      INT           NOT NULL,
     stock       INT           NOT NULL,
-    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    created_at  DATETIME      NOT NULL,
+    updated_at  DATETIME      NOT NULL
 );
 
 -- 주문 테이블
@@ -36,8 +36,8 @@ create table orders
     total_amount       INT                                  NOT NULL,
     quantity           INT                                  NOT NULL,
     kakaopay_ready_url VARCHAR(512),
-    created_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at         DATETIME                             NOT NULL,
+    updated_at         DATETIME                             NOT NULL,
 
     FOREIGN KEY (user_id)    REFERENCES users(id)    ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT
@@ -57,8 +57,8 @@ create table payments
     canceled_at    TIMESTAMP                            NULL,
     fail_reason    VARCHAR(255)                         NULL,
     is_test        BOOLEAN                              NOT NULL DEFAULT FALSE,
-    created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at     DATETIME                             NOT NULL,
+    updated_at     DATETIME                             NOT NULL,
 
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT
 );
@@ -78,8 +78,8 @@ create table payment_history
     canceled_at    TIMESTAMP                            NULL,
     fail_reason    VARCHAR(255)                         NULL,
     is_test        BOOLEAN                              NOT NULL DEFAULT FALSE,
-    created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at     DATETIME                             NOT NULL,
+    updated_at     DATETIME                             NOT NULL,
 
     FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE
 );
