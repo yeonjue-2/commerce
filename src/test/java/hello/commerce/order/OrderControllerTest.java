@@ -79,10 +79,7 @@ class OrderControllerTest {
     @DisplayName("POST /v1/orders - 유효하지 않은 주문 수량 400 Bad Request")
     void createOrder_invalidOrderQuantity() throws Exception {
         // given
-        OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 0);
-
-        // when
-        when(orderService.createOrder(any())).thenThrow(new BusinessException(ErrorCode.INVALID_ORDER_QUANTITY));
+        OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 0);  // 수량 오류, @Valid에서 걸림
 
         // then
         mockMvc.perform(post("/v1/orders")
