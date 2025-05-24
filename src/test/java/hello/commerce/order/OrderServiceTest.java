@@ -210,6 +210,13 @@ public class OrderServiceTest {
 
     @Test
     @Disabled
+    @DisplayName("updateOrder - 유효하지 않은 상태 전이 시 ErrorCode.INVALID_ORDER_STATUS_TRANSITION")
+    void updateOrder_invalidOrderStatusTransition() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
     @DisplayName("updateOrder - 존재하지 않는 주문일 경우 ErrorCode.NOT_FOUND_ORDER 발생")
     void updateOrder_notFoundOrder() {
         throw new UnsupportedOperationException();

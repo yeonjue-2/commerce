@@ -316,6 +316,9 @@ components:
             - INITIAL
             - PAID
             - CANCELED
+          description: |
+            주문 상태.
+            일부 상태 간 전이는 제한됩니다. 예: CANCELLED -> PAID 불가
           example: INITIAL
     ProductListResponseV1:
       type: object
