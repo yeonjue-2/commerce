@@ -4,6 +4,7 @@ import hello.commerce.common.request.PageRequestDto;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.dto.OrderListResponseV1;
+import hello.commerce.order.dto.UpdateOrderStatusRequestV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import jakarta.validation.Valid;
@@ -56,5 +57,12 @@ public class OrderController {
         OrderResponseV1 response = OrderResponseV1.fromEntity(orderById);
 
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/v1/orders/{order_id}")
+    public ResponseEntity<OrderResponseV1> updateOrder(@PathVariable("order_id") Long orderId,
+                                                       @Valid @RequestBody UpdateOrderStatusRequestV1 updateOrderStatusRequest) {
+        // TO-D0 주문 업데이트 서비스 호출
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 }

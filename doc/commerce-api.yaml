@@ -309,7 +309,6 @@ components:
       type: object
       required:
         - order_status
-        - total_amount
       properties:
         order_status:
           type: string
@@ -317,10 +316,10 @@ components:
             - INITIAL
             - PAID
             - CANCELED
+          description: |
+            주문 상태.
+            일부 상태 간 전이는 제한됩니다. 예: CANCELLED -> PAID 불가
           example: INITIAL
-        total_amount:
-          type: integer
-          example: 53000
     ProductListResponseV1:
       type: object
       properties:

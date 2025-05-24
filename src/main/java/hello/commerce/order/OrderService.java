@@ -1,6 +1,7 @@
 package hello.commerce.order;
 
 import hello.commerce.order.dto.OrderRequestV1;
+import hello.commerce.order.dto.UpdateOrderStatusRequestV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,7 @@ public interface OrderService {
     /**
      * 주문 생성
      * @param request
-     * @return
+     * @return 주문 단건 응답
      */
     Order createOrder(OrderRequestV1 request);
 
@@ -30,5 +31,12 @@ public interface OrderService {
      * @return 주문 단건 응답
      */
     Order getOrderById(Long orderId);
+
+    /**
+     * 주문 상태 변경
+     * @param orderId
+     * @return 주문 단건 응답
+     */
+    Order updateOrder(Long orderId, UpdateOrderStatusRequestV1 request);
 
 }
