@@ -9,6 +9,7 @@ import hello.commerce.product.ProductRepository;
 import hello.commerce.product.model.Product;
 import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -198,6 +199,20 @@ public class OrderServiceTest {
         });
 
         assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND_ORDER);
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("updateOrder 성공")
+    void updateOrder_success() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("updateOrder - 존재하지 않는 주문일 경우 ErrorCode.NOT_FOUND_ORDER 발생")
+    void updateOrder_notFoundOrder() {
+        throw new UnsupportedOperationException();
     }
 
 

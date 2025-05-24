@@ -3,6 +3,7 @@ package hello.commerce.order;
 import hello.commerce.common.model.BusinessException;
 import hello.commerce.common.model.ErrorCode;
 import hello.commerce.order.dto.OrderRequestV1;
+import hello.commerce.order.dto.UpdateOrderStatusRequestV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.ProductRepository;
@@ -56,6 +57,10 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
     }
 
+    @Override
+    public Order updateOrder(Long orderId, UpdateOrderStatusRequestV1 request) {
+        return null;
+    }
 
     private static Order createOrderEntity(OrderRequestV1 orderRequest, Product product, int totalAmount) {
         return Order.builder()
