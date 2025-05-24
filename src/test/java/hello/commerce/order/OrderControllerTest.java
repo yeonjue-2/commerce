@@ -66,7 +66,7 @@ class OrderControllerTest {
         OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 10);
 
         // when
-        when(orderService.createOrder(any())).thenReturn(createOrder(100L));
+        when(orderService.createOrder(any())).thenReturn(createOrder(product.getId(), product.getAmount(), product.getStock()));
 
         mockMvc.perform(post("/v1/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -134,7 +134,7 @@ class OrderControllerTest {
     @DisplayName("GET /v1/orders - 정상 요청 시 200 OK (orderStatus 파라미터 O)")
     void getOrders_successWithOrderStatus() throws Exception {
         // given
-        Order order1 = createOrder(100L);
+        Order order1 = createOrder(product.getId(), product.getAmount(), product.getStock());
         Page<Order> page = new PageImpl<>(List.of(order1), PageRequest.of(0, 20), 1);
 
         when(orderService.getOrders(any(), eq(OrderStatus.PAID))).thenReturn(page);
@@ -145,8 +145,8 @@ class OrderControllerTest {
                         .param("size", "20")
                         .param("order_status", "PAID"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orders[0].orderId").value(100))
-                .andExpect(jsonPath("$.orders[0].quantity").value(2))
+                .andExpect(jsonPath("$.orders[0].orderId").value(product.getId()))
+                .andExpect(jsonPath("$.orders[0].quantity").value(product.getStock()))
                 .andExpect(jsonPath("$.totalElements").value(1));
     }
 
@@ -154,7 +154,7 @@ class OrderControllerTest {
     @DisplayName("GET /v1/orders - 정상 요청 시 200 OK (orderStatus 파라미터 X)")
     void getOrders_successWithNoParameter() throws Exception {
         // given
-        Order order1 = createOrder(100L);
+        Order order1 = createOrder(product.getId(), product.getAmount(), product.getStock());
         Page<Order> page = new PageImpl<>(List.of(order1), PageRequest.of(0, 20), 1);
 
         when(orderService.getOrders(any())).thenReturn(page);
@@ -164,8 +164,8 @@ class OrderControllerTest {
                         .param("page", "1")
                         .param("size", "20"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orders[0].orderId").value(100))
-                .andExpect(jsonPath("$.orders[0].quantity").value(2))
+                .andExpect(jsonPath("$.orders[0].orderId").value(product.getId()))
+                .andExpect(jsonPath("$.orders[0].quantity").value(product.getStock()))
                 .andExpect(jsonPath("$.totalElements").value(1));
     }
 
@@ -195,7 +195,7 @@ class OrderControllerTest {
     @DisplayName("GET /v1/orders/{order_id} - 정상 요청 시 200 OK")
     void getOrderById_success() throws Exception {
         // given
-        Order order = createOrder(100L);
+        Order order = createOrder(product.getId(), product.getAmount(), product.getStock());
         when(orderService.getOrderById(any())).thenReturn(order);
 
         // when & then
@@ -228,14 +228,14 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.errorMessage").value(ErrorCode.NOT_FOUND_ORDER.getMessage()));
     }
 
-    private Order createOrder(Long id) {
+    private Order createOrder(Long id, int totalAmount, int quantity) {
         Order order = Order.builder()
                 .id(id)
                 .userId(user.getId())
                 .product(product)
-                .orderStatus(OrderStatus.PAID)
-                .quantity(2)
-                .totalAmount(70000)
+                .orderStatus(OrderStatus.INITIAL)
+                .totalAmount(totalAmount)
+                .quantity(quantity)
                 .kakaopayReadyUrl("https://kakao.url/ready")
                 .build();
         order.setCreatedAt(LocalDateTime.now());
