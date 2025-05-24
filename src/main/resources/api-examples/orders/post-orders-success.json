@@ -1,0 +1,11 @@
+{
+  "orderId": 10,
+  "userId": 10,
+  "productId": 1,
+  "orderStatus": "INITIAL",
+  "totalAmount": 10000,
+  "quantity": 1,
+  "kakaopayReadyUrl": null,
+  "createdAt": "2025-05-24T21:41:17.417899",
+  "updatedAt": "2025-05-24T21:41:17.417899"
+}

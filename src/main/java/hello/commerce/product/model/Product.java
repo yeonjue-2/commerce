@@ -1,6 +1,8 @@
 package hello.commerce.product.model;
 
 import hello.commerce.common.model.BaseEntity;
+import hello.commerce.common.model.BusinessException;
+import hello.commerce.common.model.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,4 +26,11 @@ public class Product extends BaseEntity {
 
     @Column(nullable = false)
     private int stock;
+
+    public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+        }
+        this.stock -= quantity;
+    }
 }

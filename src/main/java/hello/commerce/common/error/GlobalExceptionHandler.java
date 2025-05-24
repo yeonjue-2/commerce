@@ -39,10 +39,11 @@ public class GlobalExceptionHandler {
 
         ErrorCode code = null;
 
-        if ("page".equals(field)) {
-            code = ErrorCode.INVALID_PAGE;
-        } else if ("size".equals(field)) {
-            code = ErrorCode.INVALID_SIZE;
+        switch (field) {
+            case "page" -> code = ErrorCode.INVALID_PAGE;
+            case "size" -> code = ErrorCode.INVALID_SIZE;
+            case "quantity" -> code = ErrorCode.INVALID_ORDER_QUANTITY;
+            default -> code = ErrorCode.INVALID_ARGUMENT;
         }
 
         return new ErrorResponse(code.getCode(), code.getMessage(), null);

@@ -67,7 +67,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
-                INVALID_QUANTITY:
+                INVALID_ORDER_QUANTITY:
                   $ref: "#/components/examples/INVALID_ORDER_QUANTITY"
         '404':
           description: Not Found

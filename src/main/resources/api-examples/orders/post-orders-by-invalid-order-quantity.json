@@ -1,0 +1,5 @@
+{
+  "errorCode": 300005,
+  "errorMessage": "요청 파라미터가 유효하지 않습니다. 수량은 1 이상이어야 합니다.",
+  "errorData": null
+}
