@@ -24,29 +24,18 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @Override
     public Order createOrder(OrderRequestV1 orderRequest) {
-        // 1. 수량 유효성 검사
-        if (orderRequest.getQuantity() <= 0) {
-            throw new BusinessException(ErrorCode.INVALID_ORDER_QUANTITY);
-        }
+        // 1. 유효성 검사 - product는 영속상태
+        Product product = validateOrderCondition(orderRequest);
 
-        // 2. 상품 조회 (존재 여부 확인) - product는 영속상태
-        Product product = productRepository.findById(orderRequest.getProductId())
-                                        .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
-
-        // 3. 재고 확인
-        if (product.getStock() < orderRequest.getQuantity()) {
-            throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
-        }
-
-        // 4. 주문 생성 및 저장
+        // 2. 주문 생성 및 저장
         int totalAmount = product.getAmount() * orderRequest.getQuantity();
         Order order = createOrderEntity(orderRequest, product, totalAmount);
         orderRepository.save(order);
 
-        // 5. 재고 차감 - 영속상태인 product에 변경감지가 되어 커밋 시점에 JPA가 자동으로 update 쿼리 실행
+        // 3. 재고 차감 - 영속상태인 product에 변경감지가 되어 커밋 시점에 JPA가 자동으로 update 쿼리 실행
         product.decreaseStock(orderRequest.getQuantity());
 
-        // 6. 응답 반환
+        // 4. 응답 반환
         return orderRepository.findById(order.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
     }
@@ -76,5 +65,22 @@ public class OrderServiceImpl implements OrderService {
                 .totalAmount(totalAmount)
                 .orderStatus(OrderStatus.INITIAL)
                 .build();
+    }
+
+    private Product validateOrderCondition(OrderRequestV1 orderRequest) {
+        // 수량 유효성
+        if (orderRequest.getQuantity() <= 0) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_QUANTITY);
+        }
+
+        // product는 영속상태
+        Product product = productRepository.findById(orderRequest.getProductId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
+
+        // 재고 확인
+        if (product.getStock() < orderRequest.getQuantity()) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+        }
+        return product;
     }
 }
