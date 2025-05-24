@@ -16,3 +16,5 @@ spring:
       hibernate:
         format_sql: true     # SQL 보기 좋게 출력
       open-in-view: false    # 트랜잭션 범위 어디에서나 영속성 컨텍스트 유지
+    auditing:
+      enabled: false
