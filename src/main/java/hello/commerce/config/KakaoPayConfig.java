@@ -12,7 +12,7 @@ public class KakaoPayConfig {
     @Bean
     public WebClient kakaoWebClient(KakaoPayProperties properties) {
         return WebClient.builder()
-                .baseUrl(properties.getSecretKey())
+                .baseUrl(properties.getBaseUrl())
                 .defaultHeader("Authorization", "KakaoAK " + properties.getSecretKey())
                 .defaultHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .build();

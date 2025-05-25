@@ -14,4 +14,16 @@ public class KakaoPayProperties {
     private String approveUrl;
     private String baseRedirectUrl;
     private int taxFreeAmount;
+
+    public String getApprovalRedirectUrl(Long orderId) {
+        return baseRedirectUrl + "/" + orderId + "/approve";
+    }
+
+    public String getCancelRedirectUrl(Long orderId) {
+        return baseRedirectUrl + "/" + orderId + "/cancel";
+    }
+
+    public String getFailRedirectUrl(Long orderId) {
+        return baseRedirectUrl + "/" + orderId + "/fail";
+    }
 }

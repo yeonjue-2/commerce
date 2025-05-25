@@ -64,7 +64,7 @@ public class OrderServiceTest {
         when(orderRepository.save(any(Order.class)))
                 .thenAnswer(invocation -> {
                     Order saved = invocation.getArgument(0);
-                    saved.setId(1L); // ⭐ 실제 객체에 ID 지정
+                    saved.setId(1L); // 실제 객체에 ID 지정
                     return saved;
                 });
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(savedOrder));

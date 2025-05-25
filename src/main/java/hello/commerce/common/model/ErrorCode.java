@@ -22,6 +22,10 @@ public enum ErrorCode {
     NOT_FOUND_ORDER         (300_003, "주문 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_ORDER_QUANTITY  (300_005, "요청 파라미터가 유효하지 않습니다. 수량은 1 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
     INSUFFICIENT_STOCK      (300_006, "상품의 재고가 부족합니다.", HttpStatus.CONFLICT),
+    INVALID_ORDER_STATUS_TRANSITION  (300_007, "결제 준비는 INITIAL 상태의 주문에서만 가능합니다.", HttpStatus.BAD_REQUEST),
+
+    // 400xxx: 상품
+    NOT_FOUND_PAYMENT         (400_001, "결제 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // 999xxx: 기타
     INTERNAL_SERVER_ERROR   (999_999, "예상치 못한 오류가 발생했습니다.", HttpStatus.BAD_REQUEST);

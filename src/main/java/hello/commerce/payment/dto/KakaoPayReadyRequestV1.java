@@ -12,35 +12,35 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class KakaoPayReadyReqeustV1 {
+public class KakaoPayReadyRequestV1 {
 
     @NotNull
     private String cid;
 
     @NotNull
-    private String partner_order_id;
+    private String partnerOrderId;
 
     @NotNull
-    private String partner_user_id;
+    private String partnerUserId;
 
     @NotNull
-    private String item_name;
+    private String itemName;
 
     @NotNull @Min(1)
     private int quantity;
 
     @NotNull @PositiveOrZero
-    private int total_amount;
+    private int totalAmount;
 
     @NotNull
-    private int tax_free_amount;
+    private int taxFreeAmount;
 
     @NotNull
-    private String approval_url;
+    private String approvalUrl;
 
     @NotNull
-    private String cancel_url;
+    private String cancelUrl;
 
     @NotNull
-    private String fail_url;
+    private String failUrl;
 }
