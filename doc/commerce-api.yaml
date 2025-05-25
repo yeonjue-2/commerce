@@ -124,8 +124,8 @@ paths:
                   $ref: "#/components/examples/INVALID_PAGE"
                 INVALID_SIZE:
                   $ref: "#/components/examples/INVALID_SIZE"
-#                INVALID_ORDER_STATUS:
-#                  $ref: "#/components/examples/INVALID_ORDER_STATUS"
+  #                INVALID_ORDER_STATUS:
+  #                  $ref: "#/components/examples/INVALID_ORDER_STATUS"
   /v1/orders/{order_id}:
     get:
       tags:
@@ -159,11 +159,14 @@ paths:
               examples:
                 NOT_FOUND_ORDER:
                   $ref: "#/components/examples/NOT_FOUND_ORDER"
-    patch:
+  /v1/payments/orders/{order_id}/ready:
+    put:
       tags:
-        - order
-      summary: 주문 상태 변경
-      description: 결제 승인 또는 실패 등의 이벤트에 따라 주문 상태를 수정합니다.
+        - payment
+      summary: 결제 준비 요청
+      description: |
+        주문 ID로 카카오페이 결제를 준비합니다. 
+        결제 고유 번호(TID)와 리다이렉트 URL을 응답합니다.
       parameters:
         - $ref: "#/components/parameters/order_id"
       requestBody:
@@ -171,14 +174,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateOrderStatusRequestV1"
+              $ref: "#/components/schemas/KakaoPayReadyRequestV1"
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderResponseV1"
+                $ref: "#/components/schemas/KakaoPayReadyResponseV1"
         '400':
           description: Bad Request
           content:
@@ -186,8 +189,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
+                INVALID_ORDER_ID_PARAM:
+                  $ref: "#/components/examples/INVALID_ORDER_ID_PARAM"
                 INVALID_ORDER_STATUS:
-                  $ref: "#/components/examples/INVALID_ORDER_STATUS"
+                  $ref: "#/components/examples/INVALID_ORDER_STATUS_TRANSITION"
         '404':
           description: Not Found
           content:
@@ -243,11 +248,11 @@ components:
         stock:
           type: integer
           example: 200
-        createdAt:
+        created_at:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
-        updatedAt:
+        updated_at:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
@@ -305,21 +310,81 @@ components:
           type: string
           format: date-time
           example: "2025-04-16T10:00:00Z"
-    UpdateOrderStatusRequestV1:
+    KakaoPayReadyRequestV1:
       type: object
       required:
-        - order_status
+        - cid
+        - partner_order_id
+        - partner_user_id
+        - item_name
+        - quantity
+        - total_amount
+        - tax_free_amount
+        - approval_url
+        - cancel_url
+        - fail_url
       properties:
-        order_status:
+        cid:
           type: string
-          enum:
-            - INITIAL
-            - PAID
-            - CANCELED
-          description: |
-            주문 상태.
-            일부 상태 간 전이는 제한됩니다. 예: CANCELLED -> PAID 불가
-          example: INITIAL
+          description: 테스트용 카카오페이 가맹점 코드
+          example: "TC0ONETIME"
+        partner_order_id:
+          type: string
+          description: 가맹점 주문 번호 (서버 내부에서 생성된 주문 ID)
+          example: "20002"
+        partner_user_id:
+          type: string
+          description: 사용자 식별 ID
+          example: "10002"
+        item_name:
+          type: string
+          example: "잠이 솔솔 베개"
+        quantity:
+          type: integer
+          example: 1
+        total_amount:
+          type: integer
+          example: 10000
+        tax_free_amount:
+          type: integer
+          description: 상품 비과세 금액(0으로 고정)
+          example: 0
+        approval_url:
+          type: string
+          format: uri
+          description: 결제 승인 완료 시 redirect될 URL
+          example: "https://example.com/v1/payments/kakao/approve"
+        cancel_url:
+          type: string
+          format: uri
+          description: 결제 취소 시 redirect될 URL
+          example: "https://example.com/v1/payments/kakao/cancel"
+        fail_url:
+          type: string
+          format: uri
+          description: 결제 실패 시 redirect될 URL
+          example: "https://example.com/v1/payments/kakao/fail"
+    KakaoPayReadyResponseV1:
+      type: object
+      required:
+        - tid
+        - next_redirect_pc_url
+        - created_at
+      properties:
+        tid:
+          type: string
+          description: 카카오페이 결제 고유번호, 20자
+          example: "T1234567890abcdef123"
+        next_redirect_pc_url:
+          type: string
+          format: uri
+          description: PC 웹에서 TMS 사용자 정보 입력 화면으로 redirect할 URL
+          example: "https://kauth.kakao.com/abc/pc"
+        created_at:
+          type: string
+          format: date-time
+          description: 결제 준비 요청 시간
+          example: "2024-05-23T16:25:00Z"
     ProductListResponseV1:
       type: object
       properties:
@@ -401,6 +466,12 @@ components:
       value:
         error_code: 300006
         error_message: "상품의 재고가 부족합니다."
+        error_data: null
+    INVALID_ORDER_STATUS_TRANSITION:
+      summary: 유효하지 않은 주문 상태 전이
+      value:
+        error_code: 300007
+        error_message: "결제 준비는 INITIAL 상태의 주문에서만 가능합니다."
         error_data: null
     NOT_FOUND_PRODUCT:
       summary: 해당하는 상품을 찾을 수 없음
