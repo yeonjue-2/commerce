@@ -1,12 +1,11 @@
 package hello.commerce;
 
-import hello.commerce.common.properties.KakaoPayProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
-@EnableConfigurationProperties(KakaoPayProperties.class)
 @SpringBootApplication
+@ConfigurationPropertiesScan(basePackages = "hello.commerce")
 public class CommerceApplication {
 
     public static void main(String[] args) {

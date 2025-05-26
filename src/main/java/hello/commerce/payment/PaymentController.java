@@ -25,7 +25,7 @@ public class PaymentController {
     }
 
     // 1. 결제 승인
-    @GetMapping("/orders/{orderId}/approve")
+    @GetMapping("/v1/payments/orders/{orderId}/approve")
     public ResponseEntity<String> approvePayment(@PathVariable Long orderId,
                                                  @RequestParam("pg_token") String pgToken) {
         paymentService.approveKakaoPay(orderId, pgToken);
@@ -33,13 +33,13 @@ public class PaymentController {
     }
 
     // 2. 결제 실패
-    @GetMapping("/orders/{orderId}/fail")
+    @GetMapping("/v1/payments/orders/{orderId}/fail")
     public ResponseEntity<String> fail(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제에 실패했습니다.");
     }
 
     // 3. 결제 취소
-    @GetMapping("/orders/{orderId}/cancel")
+    @GetMapping("/v1/payments/orders/{orderId}/cancel")
     public ResponseEntity<String> cancel(@PathVariable Long orderId) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제가 취소되었습니다.");
     }

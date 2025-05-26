@@ -1,10 +1,12 @@
 package hello.commerce.payment.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Builder
 public class KakaoPayApproveResponseV1 {
     private String aid;
     private String tid;

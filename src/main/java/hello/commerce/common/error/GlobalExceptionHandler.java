@@ -3,6 +3,8 @@ package hello.commerce.common.error;
 import hello.commerce.common.model.BusinessException;
 import hello.commerce.common.model.ErrorCode;
 import hello.commerce.common.response.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
+import lombok.extern.slf4j.XSlf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -18,6 +20,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
@@ -90,6 +93,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnexpected(final Exception ex) {
+        log.error("예상치 못한 예외 발생", ex);
         ErrorCode code = ErrorCode.INTERNAL_SERVER_ERROR;
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }

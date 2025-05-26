@@ -17,11 +17,11 @@ spring:
         format_sql: true     # SQL 보기 좋게 출력
       open-in-view: false    # 트랜잭션 범위 어디에서나 영속성 컨텍스트 유지
 
-  kakao:
-      cid: TC0ONETIME  # (dev)
-      secret-key: DEV0279A09A86CC3C2024726A2DF4942D96D08F3 # Authorization 헤더에 사용 (dev)
-      base-url: https://open-api.kakaopay.com
-      ready-url: https://open-api.kakaopay.com/online/v1/payment/ready        # 카카오 API 호출용
-      approve-url: https://open-api.kakaopay.com/online/v1/payment/approve    # 카카오 API 호출용
-      base-redirect-url: https://example.com/v1/payments/orders  # 사용자 리다이렉트 조합용
-      tax-free-amount: 0
+kakao:
+  cid: TC0ONETIME  # (dev)
+  secret-key: DEV0279A09A86CC3C2024726A2DF4942D96D08F3 # Authorization 헤더에 사용 (dev)
+  base-url: https://open-api.kakaopay.com/online
+  ready-url: /v1/payment/ready        # 카카오 API 호출용
+  approve-url: /v1/payment/approve    # 카카오 API 호출용
+  base-redirect-url: https://24bc-125-247-166-240.ngrok-free.app/v1/payments/orders  # 사용자 리다이렉트 조합용
+  tax-free-amount: 0

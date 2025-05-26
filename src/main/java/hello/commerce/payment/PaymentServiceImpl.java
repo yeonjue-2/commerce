@@ -14,12 +14,17 @@ import hello.commerce.payment.model.PaymentHistory;
 import hello.commerce.payment.model.PaymentStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
+import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
@@ -110,23 +115,32 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private KakaoPayReadyResponseV1 callKakaoPayReady(KakaoPayReadyRequestV1 request) {
-        HashMap<Object, Object> formData = new HashMap<>();
-        formData.put("cid", request.getCid());
-        formData.put("partner_order_id", request.getPartnerOrderId());
-        formData.put("partner_user_id", request.getPartnerUserId());
-        formData.put("item_name", request.getItemName());
-        formData.put("quantity", String.valueOf(request.getQuantity()));
-        formData.put("total_amount", String.valueOf(request.getTotalAmount()));
-        formData.put("tax_free_amount", String.valueOf(request.getTaxFreeAmount()));
-        formData.put("approval_url", request.getApprovalUrl());
-        formData.put("cancel_url", request.getCancelUrl());
-        formData.put("fail_url", request.getFailUrl());
+        Map<Object, Object> requestBody = new HashMap<>();
+        requestBody.put("cid", request.getCid());
+        requestBody.put("partner_order_id", request.getPartnerOrderId());
+        requestBody.put("partner_user_id", request.getPartnerUserId());
+        requestBody.put("item_name", request.getItemName());
+        requestBody.put("quantity", String.valueOf(request.getQuantity()));
+        requestBody.put("total_amount", String.valueOf(request.getTotalAmount()));
+        requestBody.put("tax_free_amount", String.valueOf(request.getTaxFreeAmount()));
+        requestBody.put("approval_url", request.getApprovalUrl());
+        requestBody.put("cancel_url", request.getCancelUrl());
+        requestBody.put("fail_url", request.getFailUrl());
 
         // 응답 객체는 KakaoPayReadyResponseV1와 동일 구조를 맞춰야 함
         return webClient.post()
                 .uri(kakaoPayProps.getReadyUrl()) // /v1/payment/ready
-                .bodyValue(formData)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
                 .retrieve()
+                .onStatus(
+                        status -> status.isError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    log.error("카카오페이 오류 응답 본문: {}", errorBody);
+                                    return Mono.error(new RuntimeException("카카오페이 API 오류: " + errorBody));
+                                })
+                )
                 .bodyToMono(KakaoPayReadyResponseV1.class)
                 .block(); // 동기
     }
@@ -147,6 +161,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         KakaoPayApproveResponseV1 response = webClient.post()
                 .uri(kakaoPayProps.getApproveUrl()) // /v1/payment/approve
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(form)
                 .retrieve()
                 .bodyToMono(KakaoPayApproveResponseV1.class)
