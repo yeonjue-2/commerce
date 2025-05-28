@@ -138,7 +138,7 @@ public class PaymentServiceImpl implements PaymentService {
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
                                     log.error("카카오페이 오류 응답 본문: {}", errorBody);
-                                    return Mono.error(new RuntimeException("카카오페이 API 오류: " + errorBody));
+                                    return Mono.error(new BusinessException(ErrorCode.KAKAO_API_ERROR));
                                 })
                 )
                 .bodyToMono(KakaoPayReadyResponseV1.class)
@@ -164,6 +164,14 @@ public class PaymentServiceImpl implements PaymentService {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(form)
                 .retrieve()
+                .onStatus(
+                        status -> status.isError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    log.error("카카오페이 오류 응답 본문: {}", errorBody);
+                                    return Mono.error(new BusinessException(ErrorCode.KAKAO_API_ERROR));
+                                })
+                )
                 .bodyToMono(KakaoPayApproveResponseV1.class)
                 .block();
         return response;

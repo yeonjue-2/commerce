@@ -8,12 +8,12 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
 
-    // 공통
+    // 100xxx: 공통
     INVALID_PAGE            (100_001, "page는 1 이상의 숫자여야 합니다.", HttpStatus.BAD_REQUEST),
     INVALID_SIZE            (100_002, "page 당 size는 1에서 20 사이의 숫자여야 합니다.", HttpStatus.BAD_REQUEST),
     INVALID_ARGUMENT        (100_003, "유효하지 않은 값입니다.", HttpStatus.BAD_REQUEST),
 
-    // 상품
+    // 200xxx: 상품
     NOT_FOUND_PRODUCT       (200_001, "상품 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     // 300xxx: 주문
@@ -24,8 +24,9 @@ public enum ErrorCode {
     INSUFFICIENT_STOCK      (300_006, "상품의 재고가 부족합니다.", HttpStatus.CONFLICT),
     INVALID_ORDER_STATUS_TRANSITION  (300_007, "결제 준비는 INITIAL 상태의 주문에서만 가능합니다.", HttpStatus.BAD_REQUEST),
 
-    // 400xxx: 상품
-    NOT_FOUND_PAYMENT         (400_001, "결제 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    // 400xxx: 결제
+    NOT_FOUND_PAYMENT       (400_001, "결제 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    KAKAO_API_ERROR         (400_002, "카카오페이 API 호출 중 오류가 발생하였습니다.", HttpStatus.BAD_GATEWAY),
 
     // 999xxx: 기타
     INTERNAL_SERVER_ERROR   (999_999, "예상치 못한 오류가 발생했습니다.", HttpStatus.BAD_REQUEST);
