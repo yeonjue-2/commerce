@@ -1,8 +1,8 @@
 package hello.commerce.product.model;
 
 import hello.commerce.common.model.BaseEntity;
-import hello.commerce.common.model.BusinessException;
-import hello.commerce.common.model.ErrorCode;
+import hello.commerce.common.exception.BusinessException;
+import hello.commerce.common.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 

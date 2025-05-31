@@ -1,9 +1,9 @@
 package hello.commerce.order;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hello.commerce.common.error.GlobalExceptionHandler;
-import hello.commerce.common.model.BusinessException;
-import hello.commerce.common.model.ErrorCode;
+import hello.commerce.common.exception.GlobalExceptionHandler;
+import hello.commerce.common.exception.BusinessException;
+import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.config.TestConfig;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.dto.OrderResponseV1;
@@ -24,7 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -64,15 +63,18 @@ class OrderControllerTest {
     void createOrder_success() throws Exception {
         // given
         OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 10);
+        OrderResponseV1 expectedResponse = OrderResponseV1.fromEntity(createOrder(100L, product.getAmount(), 10));
 
         // when
-        when(orderService.createOrder(any())).thenReturn(createOrder(product.getId(), product.getAmount(), product.getStock()));
+        when(orderService.createOrder(any())).thenReturn(createOrder(product.getId(), product.getAmount(), 10));
 
+        // then
         mockMvc.perform(post("/v1/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/v1/orders/100"));
+                .andExpect(header().string("Location", "/v1/orders/100"))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponse)));
     }
 
     @Test
@@ -238,8 +240,6 @@ class OrderControllerTest {
                 .quantity(quantity)
                 .kakaopayReadyUrl("https://kakao.url/ready")
                 .build();
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
         return order;
     }
 }

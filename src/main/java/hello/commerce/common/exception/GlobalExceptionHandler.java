@@ -1,23 +1,19 @@
-package hello.commerce.common.error;
+package hello.commerce.common.exception;
 
-import hello.commerce.common.model.BusinessException;
-import hello.commerce.common.model.ErrorCode;
-import hello.commerce.common.response.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
@@ -37,14 +33,12 @@ public class GlobalExceptionHandler {
         FieldError fieldError = ex.getBindingResult().getFieldError();
         String field = fieldError.getField();
 
-        ErrorCode code = null;
-
-        switch (field) {
-            case "page" -> code = ErrorCode.INVALID_PAGE;
-            case "size" -> code = ErrorCode.INVALID_SIZE;
-            case "quantity" -> code = ErrorCode.INVALID_ORDER_QUANTITY;
-            default -> code = ErrorCode.INVALID_ARGUMENT;
-        }
+        ErrorCode code = switch (field) {
+            case "page" -> ErrorCode.INVALID_PAGE;
+            case "size" -> ErrorCode.INVALID_SIZE;
+            case "quantity" -> ErrorCode.INVALID_ORDER_QUANTITY;
+            default -> ErrorCode.INVALID_ARGUMENT;
+        };
 
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
@@ -65,6 +59,7 @@ public class GlobalExceptionHandler {
 
         ErrorCode code = switch (paramName) {
             case "order_id" -> ErrorCode.INVALID_ORDER_ID_PARAM;
+            case "pg_token" -> ErrorCode.INVALID_PG_TOKEN_PARAM;
             default -> ErrorCode.INVALID_ARGUMENT;
         };
 
@@ -76,20 +71,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMissingParam(final MissingServletRequestParameterException ex) {
-        return new ErrorResponse(100098, "필수 요청 파라미터가 없습니다: " + ex.getParameterName(), null);
-    }
+        String paramName = ex.getParameterName();
 
-    // 요청 URL이 없음 (예: 잘못된 경로 요청)
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNoHandler(final NoHandlerFoundException ex) {
-        return new ErrorResponse(100097, "요청한 리소스를 찾을 수 없습니다.", null);
+        ErrorCode code = switch (paramName) {
+            case "page" -> ErrorCode.INVALID_PAGE;
+            case "size" -> ErrorCode.INVALID_SIZE;
+            case "quantity"     -> ErrorCode.INVALID_ORDER_QUANTITY;
+            case "pg_token"     -> ErrorCode.INVALID_PG_TOKEN_PARAM;
+            case "order_status" -> ErrorCode.INVALID_ORDER_STATUS;
+            default -> ErrorCode.INVALID_ARGUMENT;
+
+            //default -> {
+            //            log.warn("Missing unknown request parameter: {}", paramName);
+            //            yield ErrorCode.INVALID_ARGUMENT;
+            //        }
+        };
+
+        return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
 
     // 기타 모든 예외
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnexpected(final Exception ex) {
+        log.error("예상치 못한 예외 발생", ex);
         ErrorCode code = ErrorCode.INTERNAL_SERVER_ERROR;
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }

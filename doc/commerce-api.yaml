@@ -443,6 +443,12 @@ components:
         error_code: 100002
         error_message:  "page 당 size는 1에서 20 사이의 숫자여야 합니다."
         error_data: null
+    NOT_FOUND_PRODUCT:
+      summary: 해당하는 상품을 찾을 수 없음
+      value:
+        error_code: 200001
+        error_message: "상품 데이터를 찾을 수 없습니다."
+        error_data: null
     INVALID_ORDER_STATUS:
       summary: 유효하지 않은 주문 상태
       value:
@@ -455,33 +461,28 @@ components:
         error_code: 300002
         error_message: "파라미터 타입이 잘못되었습니다."
         error_data: null
-    INVALID_ORDER_QUANTITY:
-      summary: 잘못된 주문 수량
-      value:
-        error_code: 300005
-        error_message: "요청 파라미터가 유효하지 않습니다. 수량은 1 이상이어야 합니다."
-        error_data: null
-    INSUFFICIENT_STOCK:
-      summary: 재고 부족
-      value:
-        error_code: 300006
-        error_message: "상품의 재고가 부족합니다."
-        error_data: null
-    INVALID_ORDER_STATUS_TRANSITION:
-      summary: 유효하지 않은 주문 상태 전이
-      value:
-        error_code: 300007
-        error_message: "결제 준비는 INITIAL 상태의 주문에서만 가능합니다."
-        error_data: null
-    NOT_FOUND_PRODUCT:
-      summary: 해당하는 상품을 찾을 수 없음
-      value:
-        error_code: 200001
-        error_message: "상품 데이터를 찾을 수 없습니다."
-        error_data: null
     NOT_FOUND_ORDER:
       summary: 해당하는 주문을 찾을 수 없음
       value:
         error_code: 300003
         error_message: "주문 데이터를 찾을 수 없습니다."
         error_data: null
+    INVALID_ORDER_QUANTITY:
+      summary: 잘못된 주문 수량
+      value:
+        error_code: 300004
+        error_message: "요청 파라미터가 유효하지 않습니다. 수량은 1 이상이어야 합니다."
+        error_data: null
+    INSUFFICIENT_STOCK:
+      summary: 재고 부족
+      value:
+        error_code: 300005
+        error_message: "상품의 재고가 부족합니다."
+        error_data: null
+    INVALID_ORDER_STATUS_TRANSITION:
+      summary: 유효하지 않은 주문 상태 전이
+      value:
+        error_code: 300006
+        error_message: "결제 준비는 INITIAL 상태의 주문에서만 가능합니다."
+        error_data: null
+

@@ -1,5 +1,6 @@
 package hello.commerce.payment.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,10 @@ import java.time.LocalDateTime;
 @Builder
 public class KakaoPayReadyResponseV1 {
     private String tid;
-    private String next_redirect_pc_url;
+
+    @JsonProperty("next_redirect_pc_url")
+    private String nextRedirectPcUrl;
+
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 }
