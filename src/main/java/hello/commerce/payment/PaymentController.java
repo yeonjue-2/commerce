@@ -15,6 +15,10 @@ public class PaymentController {
     @Autowired
     private final PaymentService paymentService;
 
+    public static final String PAYMENT_APPROVE_SUCCESS_MESSAGE = "결제 완료되었습니다.";
+    public static final String PAYMENT_APPROVE_FAIL_MESSAGE = "결제에 실패했습니다.";
+    public static final String PAYMENT_APPROVE_CANCEL_MESSAGE = "결제가 취소되었습니다.";
+
     /* 주문 -> 결제 api(readyPayment) -> 카카오페이 내부 api 요청
      * 1.결제 승인 2.결제 실패 3.결제 취소
      */
@@ -25,22 +29,22 @@ public class PaymentController {
     }
 
     // 1. 결제 승인
-    @GetMapping("/v1/payments/orders/{orderId}/approve")
-    public ResponseEntity<String> approvePayment(@PathVariable Long orderId,
+    @GetMapping("/v1/payments/orders/{order_id}/approve")
+    public ResponseEntity<String> approvePayment(@PathVariable("order_id") Long orderId,
                                                  @RequestParam("pg_token") String pgToken) {
         paymentService.approveKakaoPay(orderId, pgToken);
-        return ResponseEntity.ok("결제 완료되었습니다.");
+        return ResponseEntity.ok(PAYMENT_APPROVE_SUCCESS_MESSAGE);
     }
 
     // 2. 결제 실패
-    @GetMapping("/v1/payments/orders/{orderId}/fail")
-    public ResponseEntity<String> fail(@PathVariable Long orderId) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제에 실패했습니다.");
+    @GetMapping("/v1/payments/orders/{order_id}/fail")
+    public ResponseEntity<String> handlePaymentFailure(@PathVariable("order_id") Long orderId) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(PAYMENT_APPROVE_FAIL_MESSAGE);
     }
 
     // 3. 결제 취소
-    @GetMapping("/v1/payments/orders/{orderId}/cancel")
-    public ResponseEntity<String> cancel(@PathVariable Long orderId) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제가 취소되었습니다.");
+    @GetMapping("/v1/payments/orders/{order_id}/cancel")
+    public ResponseEntity<String> handlePaymentCancel(@PathVariable("order_id") Long orderId) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(PAYMENT_APPROVE_CANCEL_MESSAGE);
     }
 }

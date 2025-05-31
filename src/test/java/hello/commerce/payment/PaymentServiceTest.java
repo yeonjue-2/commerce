@@ -299,7 +299,7 @@ class PaymentServiceTest {
     private KakaoPayReadyResponseV1 createMockKakaoReadyResponse() {
         KakaoPayReadyResponseV1 response = KakaoPayReadyResponseV1.builder()
                 .tid("TX1234")
-                .next_redirect_pc_url("https://mock.url")
+                .nextRedirectPcUrl("https://mock.url")
                 .createdAt(LocalDateTime.now())
                 .build();
         return response;

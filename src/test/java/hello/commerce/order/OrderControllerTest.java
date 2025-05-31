@@ -64,15 +64,18 @@ class OrderControllerTest {
     void createOrder_success() throws Exception {
         // given
         OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 10);
+        OrderResponseV1 expectedResponse = OrderResponseV1.fromEntity(createOrder(100L, product.getAmount(), 10));
 
         // when
-        when(orderService.createOrder(any())).thenReturn(createOrder(product.getId(), product.getAmount(), product.getStock()));
+        when(orderService.createOrder(any())).thenReturn(createOrder(product.getId(), product.getAmount(), 10));
 
+        // then
         mockMvc.perform(post("/v1/orders")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/v1/orders/100"));
+                .andExpect(header().string("Location", "/v1/orders/100"))
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponse)));
     }
 
     @Test
@@ -238,8 +241,6 @@ class OrderControllerTest {
                 .quantity(quantity)
                 .kakaopayReadyUrl("https://kakao.url/ready")
                 .build();
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
         return order;
     }
 }

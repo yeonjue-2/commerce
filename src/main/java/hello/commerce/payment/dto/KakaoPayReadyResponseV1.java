@@ -8,6 +8,6 @@ import java.time.LocalDateTime;
 @Builder
 public class KakaoPayReadyResponseV1 {
     private String tid;
-    private String next_redirect_pc_url;
+    private String nextRedirectPcUrl;
     private LocalDateTime createdAt;
 }

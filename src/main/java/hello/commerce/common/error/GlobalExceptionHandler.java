@@ -40,14 +40,12 @@ public class GlobalExceptionHandler {
         FieldError fieldError = ex.getBindingResult().getFieldError();
         String field = fieldError.getField();
 
-        ErrorCode code = null;
-
-        switch (field) {
-            case "page" -> code = ErrorCode.INVALID_PAGE;
-            case "size" -> code = ErrorCode.INVALID_SIZE;
-            case "quantity" -> code = ErrorCode.INVALID_ORDER_QUANTITY;
-            default -> code = ErrorCode.INVALID_ARGUMENT;
-        }
+        ErrorCode code = switch (field) {
+            case "page" -> ErrorCode.INVALID_PAGE;
+            case "size" -> ErrorCode.INVALID_SIZE;
+            case "quantity" -> ErrorCode.INVALID_ORDER_QUANTITY;
+            default -> ErrorCode.INVALID_ARGUMENT;
+        };
 
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
@@ -68,6 +66,7 @@ public class GlobalExceptionHandler {
 
         ErrorCode code = switch (paramName) {
             case "order_id" -> ErrorCode.INVALID_ORDER_ID_PARAM;
+            case "pg_token" -> ErrorCode.INVALID_PG_TOKEN_PARAM;
             default -> ErrorCode.INVALID_ARGUMENT;
         };
 
@@ -79,7 +78,23 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMissingParam(final MissingServletRequestParameterException ex) {
-        return new ErrorResponse(100098, "필수 요청 파라미터가 없습니다: " + ex.getParameterName(), null);
+        String paramName = ex.getParameterName();
+
+        ErrorCode code = switch (paramName) {
+            case "page" -> ErrorCode.INVALID_PAGE;
+            case "size" -> ErrorCode.INVALID_SIZE;
+            case "quantity" -> ErrorCode.INVALID_ORDER_QUANTITY;
+            case "pg_token" -> ErrorCode.INVALID_PG_TOKEN_PARAM;
+            case "order_status" -> ErrorCode.INVALID_ORDER_STATUS;
+            default -> ErrorCode.INVALID_ARGUMENT;
+
+            //default -> {
+            //            log.warn("Missing unknown request parameter: {}", paramName);
+            //            yield ErrorCode.INVALID_ARGUMENT;
+            //        }
+        };
+
+        return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
 
     // 요청 URL이 없음 (예: 잘못된 경로 요청)

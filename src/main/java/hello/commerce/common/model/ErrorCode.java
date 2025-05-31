@@ -27,6 +27,7 @@ public enum ErrorCode {
     // 400xxx: 결제
     NOT_FOUND_PAYMENT       (400_001, "결제 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     KAKAO_API_ERROR         (400_002, "카카오페이 API 호출 중 오류가 발생하였습니다.", HttpStatus.BAD_GATEWAY),
+    INVALID_PG_TOKEN_PARAM  (400_003, "유효하지 않은 token 값입니다.", HttpStatus.BAD_REQUEST ),
 
     // 999xxx: 기타
     INTERNAL_SERVER_ERROR   (999_999, "예상치 못한 오류가 발생했습니다.", HttpStatus.BAD_REQUEST);
