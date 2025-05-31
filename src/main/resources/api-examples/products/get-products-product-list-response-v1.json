@@ -1,0 +1,15 @@
+{
+  "products": [
+    {
+      "productId": 1,
+      "productName": "테스트 상품",
+      "productAmount": 10000,
+      "stock": 33,
+      "createdAt": "2025-04-27T21:52:38",
+      "updatedAt": "2025-05-25T00:05:53"
+    }
+  ],
+  "currentPage": 1,
+  "totalPages": 1,
+  "totalElements": 1
+}

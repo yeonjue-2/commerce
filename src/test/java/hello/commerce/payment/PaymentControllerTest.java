@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hello.commerce.common.exception.GlobalExceptionHandler;
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
+import hello.commerce.common.response.ApiResponse;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.payment.dto.KakaoPayReadyResponseV1;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -125,11 +127,16 @@ class PaymentControllerTest {
         // given
         String pgToken = "sample_pgToken";
 
-        // then
+        // expected JSON
+        String expectedJson = objectMapper.writeValueAsString(
+                new ApiResponse<>(HttpStatus.OK, PAYMENT_APPROVE_SUCCESS_MESSAGE, null)
+        );
+
+        // when & then
         mockMvc.perform(get("/v1/payments/orders/{orderId}/approve", order.getId())
                         .param("pg_token", pgToken))
                 .andExpect(status().isOk())
-                .andExpect(content().string(PAYMENT_APPROVE_SUCCESS_MESSAGE));
+                .andExpect(content().json(expectedJson));
     }
 
     @Test
@@ -203,18 +210,27 @@ class PaymentControllerTest {
     @Test
     @DisplayName("GET /v1/payments/orders/{order_id}/fail 결제 승인 요청 실패")
     void handlePaymentFailure() throws Exception {
-        // then
+        // expected JSON
+        String expectedJson = objectMapper.writeValueAsString(
+                new ApiResponse<>(HttpStatus.BAD_REQUEST, PAYMENT_APPROVE_FAIL_MESSAGE, null)
+        );
+
+        // when & then
         mockMvc.perform(get("/v1/payments/orders/{order_id}/fail", order.getId()))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(PAYMENT_APPROVE_FAIL_MESSAGE));
+                .andExpect(content().json(expectedJson));
     }
 
     @Test
     @DisplayName("GET /v1/payments/orders/{order_id}/cancel 결제 승인 요청 취소")
     void handlePaymentCancel() throws Exception {
-        // then
+        // expected JSON
+        String expectedJson = objectMapper.writeValueAsString(
+                new ApiResponse<>(HttpStatus.BAD_REQUEST, PAYMENT_APPROVE_CANCEL_MESSAGE, null)
+        );
+        // when & then
         mockMvc.perform(get("/v1/payments/orders/{order_id}/cancel", order.getId()))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(PAYMENT_APPROVE_CANCEL_MESSAGE));
+                .andExpect(content().json(expectedJson));
     }
 }
