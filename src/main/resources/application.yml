@@ -1,4 +1,7 @@
 spring:
+  web:
+    resources:
+      add-mappings: false # 정적 리소스 핸들링 제거
   datasource:
     url: jdbc:mysql://localhost:3306/Commerce?serverTimezone=UTC&characterEncoding=UTF-8
     username: cmc

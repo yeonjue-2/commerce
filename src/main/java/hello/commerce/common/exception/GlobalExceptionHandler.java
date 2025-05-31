@@ -1,23 +1,16 @@
-package hello.commerce.common.error;
+package hello.commerce.common.exception;
 
-import hello.commerce.common.model.BusinessException;
-import hello.commerce.common.model.ErrorCode;
-import hello.commerce.common.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 @Slf4j
@@ -83,8 +76,8 @@ public class GlobalExceptionHandler {
         ErrorCode code = switch (paramName) {
             case "page" -> ErrorCode.INVALID_PAGE;
             case "size" -> ErrorCode.INVALID_SIZE;
-            case "quantity" -> ErrorCode.INVALID_ORDER_QUANTITY;
-            case "pg_token" -> ErrorCode.INVALID_PG_TOKEN_PARAM;
+            case "quantity"     -> ErrorCode.INVALID_ORDER_QUANTITY;
+            case "pg_token"     -> ErrorCode.INVALID_PG_TOKEN_PARAM;
             case "order_status" -> ErrorCode.INVALID_ORDER_STATUS;
             default -> ErrorCode.INVALID_ARGUMENT;
 
@@ -95,13 +88,6 @@ public class GlobalExceptionHandler {
         };
 
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
-    }
-
-    // 요청 URL이 없음 (예: 잘못된 경로 요청)
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNoHandler(final NoHandlerFoundException ex) {
-        return new ErrorResponse(100097, "요청한 리소스를 찾을 수 없습니다.", null);
     }
 
     // 기타 모든 예외

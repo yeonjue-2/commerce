@@ -1,7 +1,7 @@
 package hello.commerce.payment;
 
-import hello.commerce.common.model.BusinessException;
-import hello.commerce.common.model.ErrorCode;
+import hello.commerce.common.exception.BusinessException;
+import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.common.properties.KakaoPayProperties;
 import hello.commerce.order.OrderRepository;
 import hello.commerce.order.model.Order;
@@ -70,7 +70,7 @@ public class PaymentServiceImpl implements PaymentService {
         orderRepository.save(order);
 
         payment.setPaymentStatus(PaymentStatus.PAID);
-        payment.setPaidAt(response.getApproved_at());
+        payment.setPaidAt(response.getApprovedAt());
         payment.setPgToken(pgToken);
         paymentSave(payment);
     }
@@ -103,17 +103,6 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
     }
 
-    private static Payment createPayment(Order order, KakaoPayReadyResponseV1 response) {
-        return Payment.builder()
-                .order(order)
-                .paymentMethod("KAKAOPAY")
-                .paymentStatus(PaymentStatus.INITIAL)
-                .totalAmount(order.getTotalAmount())
-                .transactionId(response.getTid())
-                .isTest(true) // 또는 yml에서 분기
-                .build();
-    }
-
     private KakaoPayReadyResponseV1 callKakaoPayReady(KakaoPayReadyRequestV1 request) {
         Map<Object, Object> requestBody = new HashMap<>();
         requestBody.put("cid", request.getCid());
@@ -128,7 +117,7 @@ public class PaymentServiceImpl implements PaymentService {
         requestBody.put("fail_url", request.getFailUrl());
 
         // 응답 객체는 KakaoPayReadyResponseV1와 동일 구조를 맞춰야 함
-        return webClient.post()
+        KakaoPayReadyResponseV1 response = webClient.post()
                 .uri(kakaoPayProps.getReadyUrl()) // /v1/payment/ready
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
@@ -142,7 +131,15 @@ public class PaymentServiceImpl implements PaymentService {
                                 })
                 )
                 .bodyToMono(KakaoPayReadyResponseV1.class)
-                .block(); // 동기
+                .block();// 동기
+
+        // 응답 값 유효성 검사
+        if (response == null || response.getTid() == null || response.getNextRedirectPcUrl() == null) {
+            log.error("카카오페이 결제 요청 응답 필드가 누락됨: {}", response);
+            throw new BusinessException(ErrorCode.KAKAO_API_ERROR);
+        }
+
+        return response;
     }
 
     private Payment getValidPayment(Long orderId) {
@@ -174,7 +171,25 @@ public class PaymentServiceImpl implements PaymentService {
                 )
                 .bodyToMono(KakaoPayApproveResponseV1.class)
                 .block();
+
+        // 응답 값 유효성 검사
+        if (response == null || response.getTid() == null || response.getApprovedAt() == null) {
+            log.error("카카오페이 승인 응답 필드가 누락됨: {}", response);
+            throw new BusinessException(ErrorCode.KAKAO_API_ERROR);
+        }
+
         return response;
+    }
+
+    private Payment createPayment(Order order, KakaoPayReadyResponseV1 response) {
+        return Payment.builder()
+                .order(order)
+                .paymentMethod("KAKAOPAY")
+                .paymentStatus(PaymentStatus.INITIAL)
+                .totalAmount(order.getTotalAmount())
+                .transactionId(response.getTid())
+                .isTest(true) // 또는 yml에서 분기
+                .build();
     }
 
     private void paymentSave(Payment payment) {

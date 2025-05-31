@@ -1,7 +1,7 @@
 package hello.commerce.order;
 
-import hello.commerce.common.model.BusinessException;
-import hello.commerce.common.model.ErrorCode;
+import hello.commerce.common.exception.BusinessException;
+import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;

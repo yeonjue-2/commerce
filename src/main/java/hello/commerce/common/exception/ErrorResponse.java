@@ -1,4 +1,4 @@
-package hello.commerce.common.response;
+package hello.commerce.common.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

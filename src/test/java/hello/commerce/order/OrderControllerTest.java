@@ -1,9 +1,9 @@
 package hello.commerce.order;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hello.commerce.common.error.GlobalExceptionHandler;
-import hello.commerce.common.model.BusinessException;
-import hello.commerce.common.model.ErrorCode;
+import hello.commerce.common.exception.GlobalExceptionHandler;
+import hello.commerce.common.exception.BusinessException;
+import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.config.TestConfig;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.dto.OrderResponseV1;
@@ -24,7 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;

@@ -1,9 +1,9 @@
 package hello.commerce.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hello.commerce.common.error.GlobalExceptionHandler;
-import hello.commerce.common.model.BusinessException;
-import hello.commerce.common.model.ErrorCode;
+import hello.commerce.common.exception.GlobalExceptionHandler;
+import hello.commerce.common.exception.BusinessException;
+import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.payment.dto.KakaoPayReadyResponseV1;

@@ -1,4 +1,4 @@
-package hello.commerce.common.model;
+package hello.commerce.common.exception;
 
 import lombok.Getter;
 
