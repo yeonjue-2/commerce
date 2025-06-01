@@ -1,6 +1,7 @@
 package hello.commerce.payment;
 
 
+import hello.commerce.common.response.ApiResponse;
 import hello.commerce.payment.dto.KakaoPayReadyResponseV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,21 +31,23 @@ public class PaymentController {
 
     // 1. 결제 승인
     @GetMapping("/v1/payments/orders/{order_id}/approve")
-    public ResponseEntity<String> approvePayment(@PathVariable("order_id") Long orderId,
-                                                 @RequestParam("pg_token") String pgToken) {
+    public ResponseEntity<ApiResponse<Void>> approvePayment(@PathVariable("order_id") Long orderId,
+                                                              @RequestParam("pg_token") String pgToken) {
         paymentService.approveKakaoPay(orderId, pgToken);
-        return ResponseEntity.ok(PAYMENT_APPROVE_SUCCESS_MESSAGE);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK, PAYMENT_APPROVE_SUCCESS_MESSAGE, null));
     }
 
     // 2. 결제 실패
     @GetMapping("/v1/payments/orders/{order_id}/fail")
-    public ResponseEntity<String> handlePaymentFailure(@PathVariable("order_id") Long orderId) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(PAYMENT_APPROVE_FAIL_MESSAGE);
+    public ResponseEntity<ApiResponse<Void>> handlePaymentFailure(@PathVariable("order_id") Long orderId) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                             .body(new ApiResponse<>(HttpStatus.BAD_REQUEST, PAYMENT_APPROVE_FAIL_MESSAGE, null));
     }
 
     // 3. 결제 취소
     @GetMapping("/v1/payments/orders/{order_id}/cancel")
-    public ResponseEntity<String> handlePaymentCancel(@PathVariable("order_id") Long orderId) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(PAYMENT_APPROVE_CANCEL_MESSAGE);
+    public ResponseEntity<ApiResponse<Void>> handlePaymentCancel(@PathVariable("order_id") Long orderId) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                             .body(new ApiResponse<>(HttpStatus.BAD_REQUEST, PAYMENT_APPROVE_CANCEL_MESSAGE, null));
     }
 }

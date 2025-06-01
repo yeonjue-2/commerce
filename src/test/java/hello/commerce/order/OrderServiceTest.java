@@ -100,7 +100,6 @@ public class OrderServiceTest {
     void createOrder_failForNotFoundProduct() {
         // given
         OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 2);
-
         when(productRepository.findById(product.getId())).thenReturn(Optional.empty());
 
         // when & then
@@ -115,7 +114,7 @@ public class OrderServiceTest {
     @DisplayName("createOrder 실패, 요청 수량이 재고보다 많을 때 - INSUFFICIENT_STOCK")
     void createOrder_failForInsufficientStock() {
         // given
-        int quantity = product.getAmount() + 200;  // 현재 상품 수량 + 200
+        int quantity = product.getStock() + 200;  // 현재 상품 재고 + 200
 
         OrderRequestV1 request = OrderRequestV1.builder()
                 .userId(user.getId())
@@ -137,7 +136,7 @@ public class OrderServiceTest {
     @DisplayName("getOrderById 성공, OrderStatus 파라미터 포함)")
     void getOrders_successWithOrderStatus() {
         // given
-        OrderStatus filter = OrderStatus.PAID;
+        OrderStatus filter = OrderStatus.INITIAL;
         PageRequest pageable = PageRequest.of(0, 10);
         List<Order> orders = List.of(createOrder(100L, 35000, 1), createOrder(101L, 35000, 1));
         Page<Order> page = new PageImpl<>(orders);
@@ -150,6 +149,7 @@ public class OrderServiceTest {
         // then
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent().get(0).getId()).isEqualTo(100L);
+        assertThat(result.getContent().get(1).getOrderStatus()).isEqualTo(OrderStatus.INITIAL);
     }
 
     @Test

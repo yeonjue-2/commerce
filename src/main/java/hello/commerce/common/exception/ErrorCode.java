@@ -15,7 +15,6 @@ public enum ErrorCode {
     NOT_FOUND_RESOURCE      (100_097, "요청한 리소스를 찾을 수 없습니다." , HttpStatus.NOT_FOUND),
     METHOD_NOT_ALLOWED      (100_098, "지원하지 않는 HTTP 메서드입니다." , HttpStatus.METHOD_NOT_ALLOWED),
 
-
     // 200xxx: 상품
     NOT_FOUND_PRODUCT       (200_001, "상품 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
@@ -29,8 +28,10 @@ public enum ErrorCode {
 
     // 400xxx: 결제
     NOT_FOUND_PAYMENT       (400_001, "결제 데이터를 찾을 수 없습니다."           , HttpStatus.NOT_FOUND),
-    KAKAO_API_ERROR         (400_002, "카카오페이 API 호출 중 오류가 발생하였습니다.", HttpStatus.BAD_GATEWAY),
     INVALID_PG_TOKEN_PARAM  (400_003, "유효하지 않은 token 값입니다."           , HttpStatus.BAD_REQUEST ),
+
+    // 500xxx: 외부 API 관련
+    KAKAO_API_ERROR         (500_001, "카카오페이 API 호출 중 오류가 발생하였습니다.", HttpStatus.BAD_GATEWAY),
 
     // 999xxx: 기타
     INTERNAL_SERVER_ERROR   (999_999, "예상치 못한 오류가 발생했습니다."          , HttpStatus.BAD_REQUEST);

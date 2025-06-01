@@ -8,7 +8,6 @@ import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +21,6 @@ import java.net.URI;
 @RequestMapping
 public class OrderController {
 
-    @Autowired
     private final OrderService orderService;
 
     @PostMapping("/v1/orders")
@@ -41,10 +39,10 @@ public class OrderController {
             @RequestParam(value = "order_status", required = false) OrderStatus orderStatus
     ) {
         Pageable pageable = pageRequestDto.toPageable();
-        Page<Order> page = (orderStatus != null)
+        Page<Order> orders = (orderStatus != null)
                 ? orderService.getOrders(pageable, orderStatus)
                 : orderService.getOrders(pageable);
-        OrderListResponseV1 orderListResponseV1 = OrderListResponseV1.fromEntities(page);
+        OrderListResponseV1 orderListResponseV1 = OrderListResponseV1.fromEntities(orders);
 
         return ResponseEntity.ok(orderListResponseV1);
     }

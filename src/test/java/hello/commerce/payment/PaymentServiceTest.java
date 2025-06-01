@@ -48,6 +48,8 @@ class PaymentServiceTest {
     @Mock
     private PaymentRepository paymentRepository;
     @Mock
+    private PaymentHistoryRepository paymentHistoryRepository;
+    @Mock
     private KakaoPayProperties kakaoPayProps;
     @Mock
     private WebClient webClient;
