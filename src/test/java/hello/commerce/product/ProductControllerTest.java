@@ -36,8 +36,9 @@ class ProductControllerTest {
     @DisplayName("GET /v1/products - return ProductListResponseV1")
     void getProducts_success() throws Exception {
 
-        Product product = createProduct();
-        Page<Product> page = new PageImpl<>(List.of(product), PageRequest.of(0, 20), 1);
+        Product product1 = createProduct(101L);
+        Product product2 = createProduct(102L);
+        Page<Product> page = new PageImpl<>(List.of(product1, product2), PageRequest.of(0, 20), 1);
 
         // when
         when(productService.getProducts(any())).thenReturn(page);
@@ -47,9 +48,9 @@ class ProductControllerTest {
                         .param("page", "1")
                         .param("size", "20"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.products[0].productId").value(product.getId()))
-                .andExpect(jsonPath("$.products[0].productName").value(product.getName()))
-                .andExpect(jsonPath("$.totalElements").value(1));
+                .andExpect(jsonPath("$.products[0].productId").value(product1.getId()))
+                .andExpect(jsonPath("$.products[1].productId").value(product2.getId()))
+                .andExpect(jsonPath("$.totalElements").value(2));
     }
 
     @Test
@@ -74,9 +75,9 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.errorMessage").value(ErrorCode.INVALID_SIZE.getMessage()));
     }
 
-    private Product createProduct() throws Exception {
+    private Product createProduct(Long id) throws Exception {
         return Product.builder()
-                .id(100L)
+                .id(id)
                 .name("향균 베개 커버")
                 .amount(25000)
                 .stock(300)

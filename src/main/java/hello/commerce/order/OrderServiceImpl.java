@@ -73,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(ErrorCode.INVALID_ORDER_QUANTITY);
         }
 
-        // product는 영속상태
+        // product는 영속상태가 됨
         Product product = productRepository.findById(orderRequest.getProductId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
 

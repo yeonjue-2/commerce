@@ -10,7 +10,7 @@ public class ApiResponse<T> {
     private T data;
 
     public ApiResponse(HttpStatus status, String message, T data) {
-        this.code = status.value();  // ✔️ 상태 코드를 명시적으로 가져옴
+        this.code = status.value();  // 상태 코드를 명시적으로 가져옴
         this.message = message;
         this.data = data;
     }

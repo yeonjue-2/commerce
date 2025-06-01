@@ -50,7 +50,6 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(code.getCode(), code.getMessage(), null);
     }
 
-
     // @RequestParam, @PathVariable 타입 불일치
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -32,8 +32,7 @@ public class CustomErrorAttributes extends DefaultErrorAttributes {
             return ErrorCode.METHOD_NOT_ALLOWED;
         }
 
-        // 기본값은 404
-        return ErrorCode.NOT_FOUND_RESOURCE;
+        return ErrorCode.NOT_FOUND_RESOURCE; // 기본값은 404
     }
 }
 
