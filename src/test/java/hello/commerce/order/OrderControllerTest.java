@@ -6,12 +6,12 @@ import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.config.TestConfig;
 import hello.commerce.order.dto.OrderRequestV1;
-import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.model.Product;
 import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,6 +229,28 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.errorCode").value(ErrorCode.NOT_FOUND_ORDER.getCode()))
                 .andExpect(jsonPath("$.errorMessage").value(ErrorCode.NOT_FOUND_ORDER.getMessage()));
     }
+
+    @Test
+    @Disabled
+    @DisplayName("PATCH /v1/orders/{order_id} - 정상 요청 시 200 OK")
+    void patchOrder_success() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("PATCH /v1/orders/{order_id} - 파라미터 타입이 잘못되면 400 반환")
+    void patchOrder_invalidOrderStatus() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
+    @Test
+    @Disabled
+    @DisplayName("PATCH /v1/orders/{order_id} - order 데이터를 찾을 수 없으면 404 반환")
+    void patchOrder_notFoundOrder() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+
 
     private Order createOrder(Long id, int totalAmount, int quantity) {
         Order order = Order.builder()
