@@ -74,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // product는 영속상태가 됨
-        Product product = productRepository.findById(orderRequest.getProductId())
+        Product product = productRepository.findByIdForUpdate(orderRequest.getProductId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
 
         // 재고 확인

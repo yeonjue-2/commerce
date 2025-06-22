@@ -75,7 +75,7 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.errorMessage").value(ErrorCode.INVALID_SIZE.getMessage()));
     }
 
-    private Product createProduct(Long id) throws Exception {
+    private Product createProduct(Long id) {
         return Product.builder()
                 .id(id)
                 .name("향균 베개 커버")

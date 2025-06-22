@@ -17,18 +17,21 @@ public enum ErrorCode {
 
     // 200xxx: 상품
     NOT_FOUND_PRODUCT       (200_001, "상품 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    LOCK_TIMEOUT_PRODUCT    (200_002, "다른 상품 주문 요청이 처리 중입니다. 잠시 후 다시 시도해주세요.", HttpStatus.CONFLICT),
 
     // 300xxx: 주문
     INVALID_ORDER_STATUS    (300_001, "order_status 값은 INITIAL, PAID, CANCELED 중 하나여야 합니다.", HttpStatus.BAD_REQUEST),
-    INVALID_ORDER_ID_PARAM  (300_002, "파라미터 타입이 잘못되었습니다." , HttpStatus.BAD_REQUEST),
-    NOT_FOUND_ORDER         (300_003, "주문 데이터를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_ORDER_ID_PARAM  (300_002, "파라미터 타입이 잘못되었습니다."                        , HttpStatus.BAD_REQUEST),
+    NOT_FOUND_ORDER         (300_003, "주문 데이터를 찾을 수 없습니다."                        , HttpStatus.NOT_FOUND),
     INVALID_ORDER_QUANTITY  (300_004, "요청 파라미터가 유효하지 않습니다. 수량은 1 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
     INSUFFICIENT_STOCK      (300_005, "상품의 재고가 부족합니다."                             , HttpStatus.CONFLICT),
     INVALID_ORDER_STATUS_TRANSITION  (300_006, "결제 준비는 INITIAL 상태의 주문에서만 가능합니다.", HttpStatus.BAD_REQUEST),
+    LOCK_TIMEOUT_ORDER      (300_006, "다른 주문 요청이 처리 중입니다. 잠시 후 다시 시도해주세요."   , HttpStatus.CONFLICT),
 
     // 400xxx: 결제
     NOT_FOUND_PAYMENT       (400_001, "결제 데이터를 찾을 수 없습니다."           , HttpStatus.NOT_FOUND),
     INVALID_PG_TOKEN_PARAM  (400_003, "유효하지 않은 token 값입니다."           , HttpStatus.BAD_REQUEST ),
+    ALREADY_PREPARED_PAYMENT(400_004, "이미 결제정보가 존재합니다."              , HttpStatus.CONFLICT),
 
     // 500xxx: 외부 API 관련
     KAKAO_API_ERROR         (500_001, "카카오페이 API 호출 중 오류가 발생하였습니다.", HttpStatus.BAD_GATEWAY),

@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -38,8 +37,9 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     @Override
     public KakaoPayReadyResponseV1 prepareKakaoPay(Long orderId) {
-        // 1. 유효성 검사
+        // 1. 유효성 검사 및 중복 방지
         Order order = validateOrderCondition(orderId);
+        validateNoExistingPayment(orderId);
 
         // 2. 카카오페이 요청
         KakaoPayReadyRequestV1 kakaoRequest = createKakaoPayReadyRequest(orderId, order);
@@ -78,14 +78,20 @@ public class PaymentServiceImpl implements PaymentService {
 
     private Order validateOrderCondition(Long orderId) {
         // order 데이터
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
 
         // OrderStatus 상태 검증
         if (order.getOrderStatus() != OrderStatus.INITIAL) {
             throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
         }
+
         return order;
+    }
+
+    private void validateNoExistingPayment(Long orderId) {
+        paymentRepository.findByOrderId(orderId)
+                .ifPresent(p -> { throw new BusinessException(ErrorCode.ALREADY_PREPARED_PAYMENT); });
     }
 
     private KakaoPayReadyRequestV1 createKakaoPayReadyRequest(Long orderId, Order order) {
@@ -142,10 +148,21 @@ public class PaymentServiceImpl implements PaymentService {
         return response;
     }
 
+//    private Payment getValidPayment(Long orderId) {
+//        return paymentRepository.findByOrderId(orderId)
+//                .filter(p -> StringUtils.hasText(p.getTransactionId()))
+//                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PAYMENT));
+//    }
+
     private Payment getValidPayment(Long orderId) {
-        return paymentRepository.findByOrderId(orderId)
-                .filter(p -> StringUtils.hasText(p.getTransactionId()))
+        Payment payment = paymentRepository.findByOrderIdAndTransactionIdIsNotNull(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PAYMENT));
+
+        if (payment.getPaymentStatus() != PaymentStatus.INITIAL) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
+        }
+
+        return payment;
     }
 
     private KakaoPayApproveResponseV1 callKakaoPayApprove(String pgToken, String tid, Order order) {
