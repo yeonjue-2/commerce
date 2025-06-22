@@ -3,6 +3,7 @@ package hello.commerce.payment;
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.common.properties.KakaoPayProperties;
+import hello.commerce.order.OrderReader;
 import hello.commerce.order.OrderRepository;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
@@ -15,6 +16,7 @@ import hello.commerce.payment.model.PaymentStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -29,6 +31,7 @@ import java.util.Map;
 public class PaymentServiceImpl implements PaymentService {
 
     private final OrderRepository orderRepository;
+    private final OrderReader orderReader;
     private final WebClient webClient;
     private final KakaoPayProperties kakaoPayProps;
     private final PaymentRepository paymentRepository;
@@ -78,8 +81,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private Order validateOrderCondition(Long orderId) {
         // order 데이터
-        Order order = orderRepository.findByIdForUpdate(orderId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
+        Order order = orderReader.findByIdForUpdate(orderId);
 
         // OrderStatus 상태 검증
         if (order.getOrderStatus() != OrderStatus.INITIAL) {
@@ -129,7 +131,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .bodyValue(requestBody)
                 .retrieve()
                 .onStatus(
-                        status -> status.isError(),
+                        HttpStatusCode::isError,
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
                                     log.error("카카오페이 오류 응답 본문: {}", errorBody);
@@ -147,12 +149,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         return response;
     }
-
-//    private Payment getValidPayment(Long orderId) {
-//        return paymentRepository.findByOrderId(orderId)
-//                .filter(p -> StringUtils.hasText(p.getTransactionId()))
-//                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PAYMENT));
-//    }
 
     private Payment getValidPayment(Long orderId) {
         Payment payment = paymentRepository.findByOrderIdAndTransactionIdIsNotNull(orderId)
@@ -179,7 +175,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .bodyValue(form)
                 .retrieve()
                 .onStatus(
-                        status -> status.isError(),
+                        HttpStatusCode::isError,
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
                                     log.error("카카오페이 오류 응답 본문: {}", errorBody);

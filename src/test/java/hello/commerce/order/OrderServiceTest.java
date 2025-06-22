@@ -5,7 +5,7 @@ import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
-import hello.commerce.product.ProductRepository;
+import hello.commerce.product.ProductReader;
 import hello.commerce.product.model.Product;
 import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,17 +26,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderServiceTest {
+class OrderServiceTest {
 
     @Mock
     OrderRepository orderRepository;
 
     @Mock
-    ProductRepository productRepository;
+    ProductReader productReader;
 
     @InjectMocks
     OrderServiceImpl orderService;
@@ -60,7 +59,7 @@ public class OrderServiceTest {
         OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), quantity);
 
         Order savedOrder = createOrder(1L, expeditedAmount, quantity);
-        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+        when(productReader.findByIdForUpdate(product.getId())).thenReturn(product);
         when(orderRepository.save(any(Order.class)))
                 .thenAnswer(invocation -> {
                     Order saved = invocation.getArgument(0);
@@ -100,7 +99,7 @@ public class OrderServiceTest {
     void createOrder_failForNotFoundProduct() {
         // given
         OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 2);
-        when(productRepository.findById(product.getId())).thenReturn(Optional.empty());
+        when(productReader.findByIdForUpdate(product.getId())).thenThrow(new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
 
         // when & then
         BusinessException ex = assertThrows(BusinessException.class, () -> {
@@ -122,7 +121,7 @@ public class OrderServiceTest {
                 .quantity(quantity)
                 .build();
 
-        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+        when(productReader.findByIdForUpdate(product.getId())).thenReturn(product);
 
         // when & then
         BusinessException ex = assertThrows(BusinessException.class, () -> {

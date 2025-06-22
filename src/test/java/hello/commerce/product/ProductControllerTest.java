@@ -1,17 +1,13 @@
 package hello.commerce.product;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import hello.commerce.common.exception.ErrorCode;
+import hello.commerce.config.ControllerTestSupport;
 import hello.commerce.product.model.Product;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
@@ -20,17 +16,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ProductController.class)
-class ProductControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    ProductService productService;
-
-    @Autowired
-    ObjectMapper objectMapper = new ObjectMapper();
+class ProductControllerTest extends ControllerTestSupport {
 
     @Test
     @DisplayName("GET /v1/products - return ProductListResponseV1")

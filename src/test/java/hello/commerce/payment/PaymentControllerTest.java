@@ -1,10 +1,9 @@
 package hello.commerce.payment;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import hello.commerce.common.exception.GlobalExceptionHandler;
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.common.response.ApiResponse;
+import hello.commerce.config.ControllerTestSupport;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.payment.dto.KakaoPayReadyResponseV1;
@@ -13,12 +12,7 @@ import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
@@ -30,18 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(PaymentController.class)
-@Import({GlobalExceptionHandler.class})
-class PaymentControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    private PaymentService paymentService;
-
-    @Autowired
-    ObjectMapper objectMapper = new ObjectMapper();
+class PaymentControllerTest extends ControllerTestSupport {
 
     Order order;
     User user;

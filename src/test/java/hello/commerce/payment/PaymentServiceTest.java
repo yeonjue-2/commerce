@@ -3,6 +3,7 @@ package hello.commerce.payment;
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.common.properties.KakaoPayProperties;
+import hello.commerce.order.OrderReader;
 import hello.commerce.order.OrderRepository;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
@@ -46,6 +47,8 @@ class PaymentServiceTest {
     @Mock
     private OrderRepository orderRepository;
     @Mock
+    private OrderReader orderReader;
+    @Mock
     private PaymentRepository paymentRepository;
     @Mock
     private PaymentHistoryRepository paymentHistoryRepository;
@@ -66,7 +69,7 @@ class PaymentServiceTest {
     User user;
     Product product;
 
-    private final Long ORDER_ID = 1L;
+    private static final Long ORDER_ID = 1L;
 
     @BeforeEach
     void setUp() {
@@ -81,7 +84,7 @@ class PaymentServiceTest {
         Order order = createValidOrder(ORDER_ID);
         KakaoPayReadyResponseV1 readyResponse = createMockKakaoReadyResponse();
 
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
         mockKakaoPayProps();
         mockWebClientChain(readyResponse, KakaoPayReadyResponseV1.class);
 
@@ -97,7 +100,7 @@ class PaymentServiceTest {
     @DisplayName("prepareKakaoPay - 존재하지 않는 주문이면 NOT_FOUND_ORDER 예외 발생")
     void prepareKakaoPay_notFoundOrder() {
         // given
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.empty());
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenThrow(new BusinessException(ErrorCode.NOT_FOUND_ORDER));
 
         // when & then
         BusinessException exception = assertThrows(BusinessException.class, () -> {
@@ -113,8 +116,7 @@ class PaymentServiceTest {
         // given
         Order order = createValidOrder(ORDER_ID);
         order.setOrderStatus(OrderStatus.PAID);
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
         // when & then
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             paymentService.prepareKakaoPay(ORDER_ID);
@@ -128,7 +130,7 @@ class PaymentServiceTest {
     void prepareKakaoPay_kakaoApiError() {
         // given
         Order order = createValidOrder(ORDER_ID);
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
         mockKakaoPayProps();
 
         when(webClient.post()).thenReturn(requestBodyUriSpec);
@@ -171,7 +173,7 @@ class PaymentServiceTest {
                 .build();
 
         // when
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
         mockKakaoPayProps();
         mockWebClientChain(response, KakaoPayReadyResponseV1.class);
 
@@ -196,7 +198,7 @@ class PaymentServiceTest {
                 .build();
 
         // when
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
         mockKakaoPayProps();
         mockWebClientChain(badResponse, KakaoPayReadyResponseV1.class);
 
@@ -217,8 +219,8 @@ class PaymentServiceTest {
         Payment payment = createPayment(order);
         KakaoPayApproveResponseV1 approveResponse = createMockKakaoApproveResponse();
 
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-        when(paymentRepository.findByOrderId(ORDER_ID)).thenReturn(Optional.of(payment));
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+        when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.of(payment));
 
         when(kakaoPayProps.getCid()).thenReturn("TC0ONETIME");
         when(kakaoPayProps.getApproveUrl()).thenReturn("https://kapi.kakao.com/v1/payment/approve");  // TO-DO
@@ -238,7 +240,7 @@ class PaymentServiceTest {
     @Test
     @DisplayName("approveKakaoPay - 존재하지 않는 주문이면 예외 발생")
     void approveKakaoPay_notFoundOrder() {
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.empty());
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenThrow(new BusinessException(ErrorCode.NOT_FOUND_ORDER));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
@@ -251,8 +253,8 @@ class PaymentServiceTest {
     @DisplayName("approveKakaoPay - 결제 정보가 없으면 예외 발생")
     void approveKakaoPay_notFoundPayment() {
         Order order = createValidOrder(ORDER_ID);
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-        when(paymentRepository.findByOrderId(ORDER_ID)).thenReturn(Optional.empty());
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+        when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenThrow(new BusinessException(ErrorCode.NOT_FOUND_PAYMENT));
 
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
@@ -268,8 +270,8 @@ class PaymentServiceTest {
         Order order = createValidOrder(ORDER_ID);
         Payment payment = createPayment(order);
 
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-        when(paymentRepository.findByOrderId(ORDER_ID)).thenReturn(Optional.of(payment));
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+        when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.of(payment));
 
         when(kakaoPayProps.getCid()).thenReturn("TC0ONETIME");
         when(kakaoPayProps.getApproveUrl()).thenReturn("https://kapi.kakao.com/v1/payment/approve");
@@ -321,8 +323,8 @@ class PaymentServiceTest {
                 .build();
 
         // when
-        when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-        when(paymentRepository.findByOrderId(ORDER_ID)).thenReturn(Optional.of(payment));
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+        when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.of(payment));
 
         when(kakaoPayProps.getCid()).thenReturn("TC0ONETIME");
         when(kakaoPayProps.getApproveUrl()).thenReturn("https://kapi.kakao.com/v1/payment/approve");
@@ -339,9 +341,9 @@ class PaymentServiceTest {
 
 
 
-    private Order createValidOrder(Long Id) {
+    private Order createValidOrder(Long id) {
         return Order.builder()
-                .id(Id)
+                .id(id)
                 .userId(user.getId())
                 .quantity(1)
                 .totalAmount(product.getAmount())
@@ -351,25 +353,23 @@ class PaymentServiceTest {
     }
 
     private Payment createPayment(Order order) {
-        Payment payment = Payment.builder()
+        return Payment.builder()
                 .order(order)
                 .transactionId("TX1234")
                 .paymentStatus(PaymentStatus.INITIAL)
                 .build();
-        return payment;
     }
 
     private KakaoPayReadyResponseV1 createMockKakaoReadyResponse() {
-        KakaoPayReadyResponseV1 response = KakaoPayReadyResponseV1.builder()
+        return KakaoPayReadyResponseV1.builder()
                 .tid("TX1234")
                 .nextRedirectPcUrl("https://mock.url")
                 .createdAt(LocalDateTime.now())
                 .build();
-        return response;
     }
 
     private KakaoPayApproveResponseV1 createMockKakaoApproveResponse() {
-        KakaoPayApproveResponseV1 response = KakaoPayApproveResponseV1.builder()
+        return KakaoPayApproveResponseV1.builder()
                 .aid("0000")
                 .tid("TX1234")
                 .cid("test01")
@@ -381,7 +381,6 @@ class PaymentServiceTest {
                 .createdAt(LocalDateTime.now())
                 .approvedAt(LocalDateTime.now())
                 .build();
-        return response;
     }
 
     private <T> void mockWebClientChain(T response, Class<T> responseType) {
