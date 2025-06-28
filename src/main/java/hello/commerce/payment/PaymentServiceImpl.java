@@ -3,6 +3,7 @@ package hello.commerce.payment;
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.common.properties.KakaoPayProperties;
+import hello.commerce.order.OrderReader;
 import hello.commerce.order.OrderRepository;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
@@ -15,9 +16,9 @@ import hello.commerce.payment.model.PaymentStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -30,6 +31,7 @@ import java.util.Map;
 public class PaymentServiceImpl implements PaymentService {
 
     private final OrderRepository orderRepository;
+    private final OrderReader orderReader;
     private final WebClient webClient;
     private final KakaoPayProperties kakaoPayProps;
     private final PaymentRepository paymentRepository;
@@ -38,8 +40,9 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     @Override
     public KakaoPayReadyResponseV1 prepareKakaoPay(Long orderId) {
-        // 1. 유효성 검사
+        // 1. 유효성 검사 및 중복 방지
         Order order = validateOrderCondition(orderId);
+        validateNoExistingPayment(orderId);
 
         // 2. 카카오페이 요청
         KakaoPayReadyRequestV1 kakaoRequest = createKakaoPayReadyRequest(orderId, order);
@@ -78,14 +81,19 @@ public class PaymentServiceImpl implements PaymentService {
 
     private Order validateOrderCondition(Long orderId) {
         // order 데이터
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
+        Order order = orderReader.findByIdForUpdate(orderId);
 
         // OrderStatus 상태 검증
         if (order.getOrderStatus() != OrderStatus.INITIAL) {
             throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
         }
+
         return order;
+    }
+
+    private void validateNoExistingPayment(Long orderId) {
+        paymentRepository.findByOrderId(orderId)
+                .ifPresent(p -> { throw new BusinessException(ErrorCode.ALREADY_PREPARED_PAYMENT); });
     }
 
     private KakaoPayReadyRequestV1 createKakaoPayReadyRequest(Long orderId, Order order) {
@@ -123,7 +131,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .bodyValue(requestBody)
                 .retrieve()
                 .onStatus(
-                        status -> status.isError(),
+                        HttpStatusCode::isError,
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
                                     log.error("카카오페이 오류 응답 본문: {}", errorBody);
@@ -143,9 +151,14 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private Payment getValidPayment(Long orderId) {
-        return paymentRepository.findByOrderId(orderId)
-                .filter(p -> StringUtils.hasText(p.getTransactionId()))
+        Payment payment = paymentRepository.findByOrderIdAndTransactionIdIsNotNull(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PAYMENT));
+
+        if (payment.getPaymentStatus() != PaymentStatus.INITIAL) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
+        }
+
+        return payment;
     }
 
     private KakaoPayApproveResponseV1 callKakaoPayApprove(String pgToken, String tid, Order order) {
@@ -162,7 +175,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .bodyValue(form)
                 .retrieve()
                 .onStatus(
-                        status -> status.isError(),
+                        HttpStatusCode::isError,
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
                                     log.error("카카오페이 오류 응답 본문: {}", errorBody);

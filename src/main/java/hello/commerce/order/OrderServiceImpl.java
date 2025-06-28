@@ -5,7 +5,7 @@ import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
-import hello.commerce.product.ProductRepository;
+import hello.commerce.product.ProductReader;
 import hello.commerce.product.model.Product;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final ProductRepository productRepository;
+    private final ProductReader productReader;
 
     @Transactional
     @Override
@@ -74,8 +74,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // product는 영속상태가 됨
-        Product product = productRepository.findById(orderRequest.getProductId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
+        Product product = productReader.findByIdForUpdate(orderRequest.getProductId());
 
         // 재고 확인
         if (product.getStock() < orderRequest.getQuantity()) {

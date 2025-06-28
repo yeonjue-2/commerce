@@ -1,10 +1,8 @@
 package hello.commerce.order;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import hello.commerce.common.exception.GlobalExceptionHandler;
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
-import hello.commerce.config.TestConfig;
+import hello.commerce.config.ControllerTestSupport;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.model.Order;
@@ -14,15 +12,10 @@ import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
@@ -34,19 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
-@WebMvcTest(OrderController.class)
-@Import({GlobalExceptionHandler.class, TestConfig.class}) // 전역 예외 핸들러 수동 등록
-class OrderControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
-    OrderService orderService;
-
-    @Autowired
-    ObjectMapper objectMapper = new ObjectMapper();
+class OrderControllerTest extends ControllerTestSupport {
 
     User user;
     Product product;
@@ -231,7 +212,7 @@ class OrderControllerTest {
     }
 
     private Order createOrder(Long id, int totalAmount, int quantity) {
-        Order order = Order.builder()
+        return Order.builder()
                 .id(id)
                 .userId(user.getId())
                 .product(product)
@@ -240,6 +221,5 @@ class OrderControllerTest {
                 .quantity(quantity)
                 .kakaopayReadyUrl("https://kakao.url/ready")
                 .build();
-        return order;
     }
 }
