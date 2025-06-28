@@ -20,7 +20,7 @@ public class OrderResponseV1 {
     private OrderStatus orderStatus;
     private int totalAmount;
     private int quantity;
-    private String kakaopayReadyUrl;
+    private String kakaoPayReadyUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -32,7 +32,7 @@ public class OrderResponseV1 {
                 .orderStatus(order.getOrderStatus())
                 .totalAmount(order.getTotalAmount())
                 .quantity(order.getQuantity())
-                .kakaopayReadyUrl(order.getKakaopayReadyUrl())
+                .kakaoPayReadyUrl(order.getKakaoPayReadyUrl())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .build();

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class OrderResponseV1Test {
+class OrderResponseV1Test {
 
     User user;
     Product product;
@@ -38,7 +38,7 @@ public class OrderResponseV1Test {
         assertThat(dto.getOrderStatus()).isEqualTo(OrderStatus.PAID);
         assertThat(dto.getQuantity()).isEqualTo(2);
         assertThat(dto.getTotalAmount()).isEqualTo(70000);
-        assertThat(dto.getKakaopayReadyUrl()).isEqualTo("https://kakaopay.url/ready");
+        assertThat(dto.getKakaoPayReadyUrl()).isEqualTo("https://kakaopay.url/ready");
     }
 
     private Order createOrder(Long id) {
@@ -49,7 +49,7 @@ public class OrderResponseV1Test {
                 .orderStatus(OrderStatus.PAID)
                 .quantity(2)
                 .totalAmount(70000)
-                .kakaopayReadyUrl("https://kakaopay.url/ready")
+                .kakaoPayReadyUrl("https://kakaopay.url/ready")
                 .build();
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
