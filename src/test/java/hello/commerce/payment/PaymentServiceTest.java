@@ -17,6 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -85,7 +89,7 @@ class PaymentServiceTest {
         KakaoPayReadyResponseV1 readyResponse = createMockKakaoReadyResponse();
 
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
-        mockKakaoPayProps();
+        mockPrepareKakaoPayProps();
         mockWebClientChain(readyResponse, KakaoPayReadyResponseV1.class);
 
         // when
@@ -110,6 +114,7 @@ class PaymentServiceTest {
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND_ORDER);
     }
 
+
     @Test
     @DisplayName("prepareKakaoPay - 주문 상태가 INITIAL이 아니면 INVALID_ORDER_STATUS_TRANSITION 발생")
     void prepareKakaoPay_invalidOrderStatus() {
@@ -117,6 +122,7 @@ class PaymentServiceTest {
         Order order = createValidOrder(ORDER_ID);
         order.setOrderStatus(OrderStatus.PAID);
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+
         // when & then
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             paymentService.prepareKakaoPay(ORDER_ID);
@@ -126,12 +132,30 @@ class PaymentServiceTest {
     }
 
     @Test
+    @DisplayName("prepareKakaoPay - 중복 주문이 생성되지 않도록 확인한다.")
+    void prepareKakaoPay_checkDuplicatePayment() {
+        // given
+        Order order = createValidOrder(ORDER_ID);
+        Payment payment = createPayment(order);
+
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+        when(paymentRepository.findByOrderId(ORDER_ID)).thenReturn(Optional.of(payment));
+
+        // when & then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            paymentService.prepareKakaoPay(ORDER_ID);
+        });
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ALREADY_PREPARED_PAYMENT);
+    }
+
+    @Test
     @DisplayName("prepareKakaoPay - 카카오페이 API 오류 발생 시 BusinessException 반환")
     void prepareKakaoPay_kakaoApiError() {
         // given
         Order order = createValidOrder(ORDER_ID);
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
-        mockKakaoPayProps();
+        mockPrepareKakaoPayProps();
 
         when(webClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
@@ -162,22 +186,30 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("카카오페이 응답에 TID가 null이면 예외 발생")
-    void prepareKakaoPay_shouldThrow_whenTidIsNull() {
+    @DisplayName("카카오페이 응답 객체 자체가 null이면 예외 발생")
+    void prepareKakaoPay_shouldThrow_whenResponseIsNull() {
         // given
         Order order = createValidOrder(ORDER_ID);
-        KakaoPayReadyResponseV1 response = KakaoPayReadyResponseV1.builder()
-                .tid(null) // 강제 누락
-                .nextRedirectPcUrl("https://redirect.url")
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        // when
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
-        mockKakaoPayProps();
+        mockPrepareKakaoPayProps();
+        mockWebClientChain(null, KakaoPayReadyResponseV1.class);
+
+        // when & then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            paymentService.prepareKakaoPay(ORDER_ID);
+        });
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
+    }
+
+    @ParameterizedTest(name = "{index}: 카카오페이 응답의 {0} 필드가 null일 때 예외 발생")
+    @MethodSource("invalidKakaoPayReadyResponses")
+    void prepareKakaoPay_shouldThrow_whenFieldIsNull(String desc, KakaoPayReadyResponseV1 response) {
+        Order order = createValidOrder(ORDER_ID);
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+        mockPrepareKakaoPayProps();
         mockWebClientChain(response, KakaoPayReadyResponseV1.class);
 
-        // then
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             paymentService.prepareKakaoPay(ORDER_ID);
         });
@@ -185,31 +217,20 @@ class PaymentServiceTest {
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
     }
 
-    @Test
-    @DisplayName("카카오페이 응답에 nextRedirectPcUrl이 null이면 예외 발생")
-    void prepareKakaoPay_shouldThrow_whenResponseMissingField() {
-        // given
-        // given
-        Order order = createValidOrder(ORDER_ID);
-        KakaoPayReadyResponseV1 badResponse = KakaoPayReadyResponseV1.builder()
-                .tid("valid_tid")
-                .nextRedirectPcUrl(null) // 중요 필드 누락
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        // when
-        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
-        mockKakaoPayProps();
-        mockWebClientChain(badResponse, KakaoPayReadyResponseV1.class);
-
-        // then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.prepareKakaoPay(ORDER_ID);
-        });
-
-        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
+    static Stream<Arguments> invalidKakaoPayReadyResponses() {
+        return Stream.of(
+                Arguments.of("tid", KakaoPayReadyResponseV1.builder()
+                        .tid(null)
+                        .nextRedirectPcUrl("https://url")
+                        .createdAt(LocalDateTime.now())
+                        .build()),
+                Arguments.of("nextRedirectPcUrl", KakaoPayReadyResponseV1.builder()
+                        .tid("validTid")
+                        .nextRedirectPcUrl(null)
+                        .createdAt(LocalDateTime.now())
+                        .build())
+        );
     }
-
 
     @Test
     @DisplayName("approveKakaoPay - 카카오페이 결제 승인 성공")
@@ -254,13 +275,33 @@ class PaymentServiceTest {
     void approveKakaoPay_notFoundPayment() {
         Order order = createValidOrder(ORDER_ID);
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
-        when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenThrow(new BusinessException(ErrorCode.NOT_FOUND_PAYMENT));
+        when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
         });
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND_PAYMENT);
+    }
+
+    @Test
+    @DisplayName("approveKakaoPay - 결제 상태가 INITIAL이 아니면 예외 발생")
+    void approveKakaoPay_paymentStatusIsNotInitial() {
+        Order order = createValidOrder(ORDER_ID);
+        Payment payment = Payment.builder()
+                .order(order)
+                .transactionId("TX1234")
+                .paymentStatus(PaymentStatus.PAID)
+                .build();
+
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+        when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.of(payment));
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
+        });
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
     }
 
     @Test
@@ -304,34 +345,18 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("카카오페이 응답에 nextRedirectPcUrl이 null이면 예외 발생")
-    void approveKakaoPay_shouldThrow_whenResponseMissingField() {
+    @DisplayName("카카오페이 응답 객체 자체가 null이면 예외 발생")
+    void approveKakaoPay_shouldThrow_whenResponseIsNull() {
         // given
         Order order = createValidOrder(ORDER_ID);
         Payment payment = createPayment(order);
-        KakaoPayApproveResponseV1 badResponse = KakaoPayApproveResponseV1.builder()
-                .aid("0000")
-                .tid("TX1234")
-                .cid("test01")
-                .partnerOrderId("1")
-                .partnerUserId(String.valueOf(user.getId()))
-                .paymentMethodType("CARD")
-                .itemName(product.getName())
-                .quantity(1)
-                .createdAt(LocalDateTime.now())
-                .approvedAt(null)
-                .build();
 
-        // when
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
         when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.of(payment));
+        mockApproveKakaoPayProps();
+        mockWebClientChain(null, KakaoPayApproveResponseV1.class);
 
-        when(kakaoPayProps.getCid()).thenReturn("TC0ONETIME");
-        when(kakaoPayProps.getApproveUrl()).thenReturn("https://kapi.kakao.com/v1/payment/approve");
-
-        mockWebClientChain(badResponse, KakaoPayApproveResponseV1.class);
-
-        // then
+        // when & then
         BusinessException exception = assertThrows(BusinessException.class, () -> {
             paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
         });
@@ -339,7 +364,38 @@ class PaymentServiceTest {
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
     }
 
+    @ParameterizedTest(name = "{index}: 카카오페이 응답의 {0} 필드가 null일 때 예외 발생")
+    @MethodSource("invalidKakaoPayApproveResponses")
+    void approveKakaoPay_shouldThrow_whenFieldIsNull(String desc, KakaoPayApproveResponseV1 response) {
+        // given
+        Order order = createValidOrder(ORDER_ID);
+        Payment payment = createPayment(order);
 
+        when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
+        when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.of(payment));
+        mockApproveKakaoPayProps();
+        mockWebClientChain(response, KakaoPayApproveResponseV1.class);
+
+        // when & then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
+        });
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
+    }
+
+    static Stream<Arguments> invalidKakaoPayApproveResponses() {
+        return Stream.of(
+                Arguments.of("tid", KakaoPayApproveResponseV1.builder()
+                        .tid(null)
+                        .approvedAt(LocalDateTime.now())
+                        .build()),
+                Arguments.of("approvedAt", KakaoPayApproveResponseV1.builder()
+                        .tid("validTid")
+                        .approvedAt(null)
+                        .build())
+        );
+    }
 
     private Order createValidOrder(Long id) {
         return Order.builder()
@@ -390,15 +446,21 @@ class PaymentServiceTest {
         when(requestBodySpec.bodyValue(any(Map.class))).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(responseType)).thenReturn(Mono.just(response));
+        when(responseSpec.bodyToMono(responseType)).thenReturn(Mono.justOrEmpty(response));
     }
 
-    private void mockKakaoPayProps() {
+    private void mockPrepareKakaoPayProps() {
         when(kakaoPayProps.getCid()).thenReturn("TC0ONETIME");
         when(kakaoPayProps.getTaxFreeAmount()).thenReturn(0);
         when(kakaoPayProps.getApprovalRedirectUrl(ORDER_ID)).thenReturn("http://localhost/approve");
         when(kakaoPayProps.getCancelRedirectUrl(ORDER_ID)).thenReturn("http://localhost/cancel");
         when(kakaoPayProps.getFailRedirectUrl(ORDER_ID)).thenReturn("http://localhost/fail");
         when(kakaoPayProps.getReadyUrl()).thenReturn("https://kapi.kakao.com/v1/payment/ready");
+    }
+
+
+    private void mockApproveKakaoPayProps() {
+        when(kakaoPayProps.getCid()).thenReturn("TC0ONETIME");
+        when(kakaoPayProps.getApproveUrl()).thenReturn("https://kapi.kakao.com/v1/payment/approve");
     }
 }

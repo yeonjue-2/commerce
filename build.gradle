@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
 }
 
 group = 'hello'
@@ -40,4 +41,97 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// Jacoco 관련 설정
+jacoco {
+    toolVersion = '0.8.8'
+}
+// report 생성
+jacocoTestReport {
+    dependsOn test
+    reports {
+        html.required.set(true)
+        xml.required.set(false)
+        csv.required.set(false)
+    }
+
+    afterEvaluate { // verify에서 제외함. 퍼센티지에서 제거함.
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/CommerceApplication.class',
+                    '**/exception/**',
+                    '**/dto/**',
+                    '**/request/**',
+                    '**/response/**',
+                    '**/config/**',
+                    '**/properties/**'
+            ])
+        }))
+    }
+
+    finalizedBy(tasks.named("jacocoTestCoverageVerification"))
+}
+
+// violationRules에 따라서 커버리지를 만족하는지 검증
+jacocoTestCoverageVerification {
+    afterEvaluate { // verify에서 제외함. 퍼센티지에서 제거함.
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/CommerceApplication.class',
+                    '**/exception/**',
+                    '**/dto/**',
+                    '**/request/**',
+                    '**/response/**',
+                    '**/config/**',
+                    '**/properties/**'
+            ])
+        }))
+    }
+    violationRules {
+        rule {
+
+            enabled = true                  // 룰을 간단히 켜고 끌 수 있다.
+            element = 'CLASS'               // 룰을 체크할 단위는 클래스 단위
+
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.90
+            }
+
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+
+            limit {
+                counter = 'LINE'
+                value = 'TOTALCOUNT'
+                maximum = 200
+            }
+        }
+    }
+}
+
+tasks.register("testCoverage", Test) {
+    group 'verification'
+    description 'Runs the unit tests with coverage'
+
+    classpath = sourceSets.test.runtimeClasspath
+    testClassesDirs = sourceSets.test.output.classesDirs
+
+    // test -> jacocoTestReport -> jacocoTestCoverageVerification 순으로 작동
+    dependsOn(':test',
+            ':jacocoTestReport',
+            ':jacocoTestCoverageVerification')
+}
+
+tasks.named("jacocoTestReport").configure {
+    mustRunAfter(tasks.named("test"))
+}
+
+tasks.named("jacocoTestCoverageVerification").configure {
+    mustRunAfter(tasks.named("jacocoTestReport"))
 }

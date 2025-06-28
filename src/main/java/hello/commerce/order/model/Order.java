@@ -37,5 +37,5 @@ public class Order extends BaseEntity {
     private int quantity;
 
     @Column(length = 512)
-    private String kakaopayReadyUrl;
+    private String kakaoPayReadyUrl;
 }

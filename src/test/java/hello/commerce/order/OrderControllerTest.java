@@ -219,7 +219,7 @@ class OrderControllerTest extends ControllerTestSupport {
                 .orderStatus(OrderStatus.INITIAL)
                 .totalAmount(totalAmount)
                 .quantity(quantity)
-                .kakaopayReadyUrl("https://kakao.url/ready")
+                .kakaoPayReadyUrl("https://kakao.url/ready")
                 .build();
     }
 }

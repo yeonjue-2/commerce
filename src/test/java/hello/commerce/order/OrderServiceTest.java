@@ -24,8 +24,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,16 +55,11 @@ class OrderServiceTest {
         int quantity = 10;
         int expeditedAmount = product.getAmount() * quantity;
 
-        OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), quantity);
+        OrderRequestV1 request = createOrderRequestWithQuantity(quantity);
 
         Order savedOrder = createOrder(1L, expeditedAmount, quantity);
         when(productReader.findByIdForUpdate(product.getId())).thenReturn(product);
-        when(orderRepository.save(any(Order.class)))
-                .thenAnswer(invocation -> {
-                    Order saved = invocation.getArgument(0);
-                    saved.setId(1L); // 실제 객체에 ID 지정
-                    return saved;
-                });
+        mockOrderSaveWithId(1L);
         when(orderRepository.findById(anyLong())).thenReturn(Optional.of(savedOrder));
 
         // when
@@ -83,8 +77,7 @@ class OrderServiceTest {
     @DisplayName("createOrder 실패, 요청 수량이 0보다 작음 - INVALID_ORDER_QUANTITY")
     void createOrder_failForQuantity() {
         // given
-        int quantity = 0;
-        OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), quantity);
+        OrderRequestV1 request = createOrderRequestWithQuantity(0);
 
         // when & then
         BusinessException ex = assertThrows(BusinessException.class, () -> {
@@ -98,7 +91,7 @@ class OrderServiceTest {
     @DisplayName("createOrder 실패, 상품을 찾을 수 없을 때 - NOT_FOUND_PRODUCT")
     void createOrder_failForNotFoundProduct() {
         // given
-        OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 2);
+        OrderRequestV1 request = createOrderRequestWithQuantity(2);
         when(productReader.findByIdForUpdate(product.getId())).thenThrow(new BusinessException(ErrorCode.NOT_FOUND_PRODUCT));
 
         // when & then
@@ -115,11 +108,7 @@ class OrderServiceTest {
         // given
         int quantity = product.getStock() + 200;  // 현재 상품 재고 + 200
 
-        OrderRequestV1 request = OrderRequestV1.builder()
-                .userId(user.getId())
-                .productId(product.getId())
-                .quantity(quantity)
-                .build();
+        OrderRequestV1 request = createOrderRequestWithQuantity(quantity);
 
         when(productReader.findByIdForUpdate(product.getId())).thenReturn(product);
 
@@ -129,6 +118,28 @@ class OrderServiceTest {
         });
 
         assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_STOCK);
+    }
+
+    @Test
+    @DisplayName("createOrder 실패, 응답 반환 시 주문 데이터가 없을 경우 - INSUFFICIENT_STOCK")
+    void createOrder_notFoundOrder() {
+        // given
+        int quantity = 10;
+        int expeditedAmount = product.getAmount() * quantity;
+
+        OrderRequestV1 request = createOrderRequestWithQuantity(quantity);
+        Order savedOrder = createOrder(1L, expeditedAmount, quantity);
+
+        when(productReader.findByIdForUpdate(product.getId())).thenReturn(product);
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+        when(orderRepository.findById(nullable(Long.class))).thenReturn(Optional.empty());
+
+        // when & then
+        BusinessException ex = assertThrows(BusinessException.class, () -> {
+            orderService.createOrder(request);
+        });
+
+        assertThat(ex.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND_ORDER);
     }
 
     @Test
@@ -209,5 +220,22 @@ class OrderServiceTest {
                 .totalAmount(totalAmount)
                 .quantity(quantity)
                 .build();
+    }
+
+    private OrderRequestV1 createOrderRequestWithQuantity(int quantity) {
+        return OrderRequestV1.builder()
+                .userId(user.getId())
+                .productId(product.getId())
+                .quantity(quantity)
+                .build();
+    }
+
+    private void mockOrderSaveWithId(long id) {
+        when(orderRepository.save(any(Order.class)))
+                .thenAnswer(invocation -> {
+                    Order saved = invocation.getArgument(0);
+                    saved.setId(id); // 실제 객체에 ID 지정
+                    return saved;
+                });
     }
 }

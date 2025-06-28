@@ -42,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
     public KakaoPayReadyResponseV1 prepareKakaoPay(Long orderId) {
         // 1. 유효성 검사 및 중복 방지
         Order order = validateOrderCondition(orderId);
-        validateNoExistingPayment(orderId);
+        checkDuplicatePayment(orderId);
 
         // 2. 카카오페이 요청
         KakaoPayReadyRequestV1 kakaoRequest = createKakaoPayReadyRequest(orderId, order);
@@ -91,7 +91,7 @@ public class PaymentServiceImpl implements PaymentService {
         return order;
     }
 
-    private void validateNoExistingPayment(Long orderId) {
+    private void checkDuplicatePayment(Long orderId) {
         paymentRepository.findByOrderId(orderId)
                 .ifPresent(p -> { throw new BusinessException(ErrorCode.ALREADY_PREPARED_PAYMENT); });
     }
