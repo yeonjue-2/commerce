@@ -20,13 +20,25 @@ KakaoPay 서비스를 연동하여 결제 기능을 구현하며, 향후 다양�
 </br>
 
 ## 기술 스택
-| <img src="https://img.shields.io/badge/Java_17-007396?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/spring boot_3.4.4-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/gradle_8.13-02303A?style=for-the-badge&logo=gradle&logoColor=white"> <img src="https://img.shields.io/badge/mysql_8.0.29-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white"> <img src="https://img.shields.io/badge/JaCoCo_0.8.8-F7941E?style=for-the-badge">
+| <img src="https://img.shields.io/badge/Java_17-007396?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/spring boot_3.4.4-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/gradle_8.13-02303A?style=for-the-badge&logo=gradle&logoColor=white"> <img src="https://img.shields.io/badge/mysql_8.0.29-4479A1?style=for-the-badge&logo=mysql&logoColor=white"> <img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white"> 
   | :--- | 
+|<img src="https://img.shields.io/badge/JUnit_5.11.4-green?style=for-the-badge"> <img src="https://img.shields.io/badge/JaCoCo_0.8.8-F7941E?style=for-the-badge"> <img src="https://img.shields.io/badge/Apache_JMeter_5.6.4-E2231A?style=for-the-badge">|
+
+</br>
+
+## 기능 요구사항
 
 
 </br>
 
-## 성능 요구사항
+## 비기능 요구사항
+- 조회성 GET API (상품 조회): 200ms 이내 응답
+  - 상품 조회: 1,000 QPS 처리 가능
+- 주문 POST API: 500ms 이내 응답
+  - 주문 결제: 100 TPS 처리 가능
+
+<img src="https://img.shields.io/badge/GET-QPS_1175-blue"> <img src="https://img.shields.io/badge/GET-_P90_62ms-blue"> <img src="https://img.shields.io/badge/GET-_ERROR_0%25-blue"> </br>
+<img src="https://img.shields.io/badge/POST-QPS_111-green"> <img src="https://img.shields.io/badge/POST-P90_51ms-green"> <img src="https://img.shields.io/badge/POST-ERROR_0%25-green">
 
 </br>
 
