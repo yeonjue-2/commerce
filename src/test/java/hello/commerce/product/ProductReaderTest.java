@@ -33,7 +33,7 @@ class ProductReaderTest {
         // given
         Product product = Product.builder()
                 .id(1L)
-                .name("상품")
+                .productName("상품")
                 .amount(10000)
                 .stock(5)
                 .build();

@@ -432,7 +432,7 @@ class PaymentServiceTest {
                 .partnerOrderId("1")
                 .partnerUserId(String.valueOf(user.getId()))
                 .paymentMethodType("CARD")
-                .itemName(product.getName())
+                .itemName(product.getProductName())
                 .quantity(1)
                 .createdAt(LocalDateTime.now())
                 .approvedAt(LocalDateTime.now())

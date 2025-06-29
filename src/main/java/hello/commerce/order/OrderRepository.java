@@ -22,7 +22,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints({
-            @QueryHint(name = "javax.persistence.lock.timeout", value = "3000") // 밀리초 단위
+            @QueryHint(name = "jakarta.persistence.lock.timeout", value = "3000") // 밀리초 단위
     })
     @Query("select o from Order o where o.id = :id")
     Optional<Order> findByIdForUpdate(@Param("order_id") Long orderId);

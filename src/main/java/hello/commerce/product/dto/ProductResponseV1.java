@@ -23,7 +23,7 @@ public class ProductResponseV1 {
     public static ProductResponseV1 fromEntity(Product product) {
         return ProductResponseV1.builder()
                 .productId(product.getId())
-                .productName(product.getName())
+                .productName(product.getProductName())
                 .productAmount(product.getAmount())
                 .stock(product.getStock())
                 .createdAt(product.getCreatedAt())

@@ -101,7 +101,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .cid(kakaoPayProps.getCid())
                 .partnerOrderId(order.getId().toString())
                 .partnerUserId(order.getUserId().toString())
-                .itemName(order.getProduct().getName())
+                .itemName(order.getProduct().getProductName())
                 .quantity(order.getQuantity())
                 .totalAmount(order.getTotalAmount())
                 .taxFreeAmount(kakaoPayProps.getTaxFreeAmount())

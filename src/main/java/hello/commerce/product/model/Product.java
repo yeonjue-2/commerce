@@ -19,7 +19,7 @@ public class Product extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String productName;
 
     @Column(nullable = false)
     private int amount;
