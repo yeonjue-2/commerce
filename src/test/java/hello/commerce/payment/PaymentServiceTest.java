@@ -107,10 +107,7 @@ class PaymentServiceTest {
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenThrow(new BusinessException(ErrorCode.NOT_FOUND_ORDER));
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.prepareKakaoPay(ORDER_ID);
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.prepareKakaoPay(ORDER_ID));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND_ORDER);
     }
 
@@ -124,10 +121,7 @@ class PaymentServiceTest {
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.prepareKakaoPay(ORDER_ID);
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.prepareKakaoPay(ORDER_ID));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
     }
 
@@ -142,10 +136,7 @@ class PaymentServiceTest {
         when(paymentRepository.findByOrderId(ORDER_ID)).thenReturn(Optional.of(payment));
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.prepareKakaoPay(ORDER_ID);
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.prepareKakaoPay(ORDER_ID));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ALREADY_PREPARED_PAYMENT);
     }
 
@@ -178,10 +169,7 @@ class PaymentServiceTest {
         });
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.prepareKakaoPay(ORDER_ID);
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.prepareKakaoPay(ORDER_ID));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
     }
 
@@ -195,10 +183,7 @@ class PaymentServiceTest {
         mockWebClientChain(null, KakaoPayReadyResponseV1.class);
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.prepareKakaoPay(ORDER_ID);
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.prepareKakaoPay(ORDER_ID));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
     }
 
@@ -210,10 +195,7 @@ class PaymentServiceTest {
         mockPrepareKakaoPayProps();
         mockWebClientChain(response, KakaoPayReadyResponseV1.class);
 
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.prepareKakaoPay(ORDER_ID);
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.prepareKakaoPay(ORDER_ID));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
     }
 
@@ -263,10 +245,7 @@ class PaymentServiceTest {
     void approveKakaoPay_notFoundOrder() {
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenThrow(new BusinessException(ErrorCode.NOT_FOUND_ORDER));
 
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.approveKakaoPay(ORDER_ID, "pgToken123"));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND_ORDER);
     }
 
@@ -277,10 +256,7 @@ class PaymentServiceTest {
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
         when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.empty());
 
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.approveKakaoPay(ORDER_ID, "pgToken123"));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND_PAYMENT);
     }
 
@@ -297,10 +273,7 @@ class PaymentServiceTest {
         when(orderReader.findByIdForUpdate(ORDER_ID)).thenReturn(order);
         when(paymentRepository.findByOrderIdAndTransactionIdIsNotNull(ORDER_ID)).thenReturn(Optional.of(payment));
 
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.approveKakaoPay(ORDER_ID, "pgToken123"));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_ORDER_STATUS_TRANSITION);
     }
 
@@ -337,10 +310,7 @@ class PaymentServiceTest {
         });
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.approveKakaoPay(ORDER_ID, "pgToken123"));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
     }
 
@@ -357,10 +327,7 @@ class PaymentServiceTest {
         mockWebClientChain(null, KakaoPayApproveResponseV1.class);
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.approveKakaoPay(ORDER_ID, "pgToken123"));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
     }
 
@@ -377,10 +344,7 @@ class PaymentServiceTest {
         mockWebClientChain(response, KakaoPayApproveResponseV1.class);
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            paymentService.approveKakaoPay(ORDER_ID, "pgToken123");
-        });
-
+        BusinessException exception = assertThrows(BusinessException.class, () -> paymentService.approveKakaoPay(ORDER_ID, "pgToken123"));
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.KAKAO_API_ERROR);
     }
 
