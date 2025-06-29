@@ -3,7 +3,7 @@
 It integrates KakaoPay to implement payment functionality and is designed to be extensible for future backend integration and development.
 
 >이 프로젝트는 테스트 커버리지 80% 이상을 목표로 클린 코드를 지향하는 **백엔드 베이스 애플리케이션**입니다.</br>
-KakaoPay 서비스를 연동하여 결제 기능을 구현하며, 향후 다양한 백엔드 통합 개발에 확장 가능하도록 설계되었습니다.
+KakaoPay 서비스를 연동하여 결제 기능을 구현했으며, 향후 다양한 백엔드 통합 개발에 확장 가능하도록 설계되었습니다.
 
 <img src="https://img.shields.io/badge/coverage-100%25-blue"> <img src="https://img.shields.io/badge/branches-100%25-green">
 
@@ -27,15 +27,20 @@ KakaoPay 서비스를 연동하여 결제 기능을 구현하며, 향후 다양�
 </br>
 
 ## 기능 요구사항
-
+- 회원가입 및 로그인은 제공하지 않습니다.
+- 상품 정보 리스트만 제공합니다. (상품 이름, 상품 Id, 상품 수량, 상품 금액(₩))
+- 주문 및 결제 기능만 제공합니다.
+    - 단일 상품 주문만 가능합니다.
+    - 결제 종류는 [카카오페이](https://developers.kakaopay.com/docs/payment/online/common)만 지원합니다.
+    - 취소된 주문은 다시 결제 시도할 수 없습니다.
 
 </br>
 
 ## 비기능 요구사항
 - 조회성 GET API (상품 조회): 200ms 이내 응답
-  - 상품 조회: 1,000 QPS 처리 가능
+  - 상품 조회: 1,000 QPS 처리 가능 [🔗](https://yeonjue-2.github.io/Static-web/cmc-GET-products/index.html)
 - 주문 POST API: 500ms 이내 응답
-  - 주문 결제: 100 TPS 처리 가능
+  - 주문 결제: 100 TPS 처리 가능 [🔗](https://yeonjue-2.github.io/Static-web/cmc-POST-orders/index.html)
 
 <img src="https://img.shields.io/badge/GET-QPS_1175-blue"> <img src="https://img.shields.io/badge/GET-_P90_62ms-blue"> <img src="https://img.shields.io/badge/GET-_ERROR_0%25-blue"> </br>
 <img src="https://img.shields.io/badge/POST-QPS_111-green"> <img src="https://img.shields.io/badge/POST-P90_51ms-green"> <img src="https://img.shields.io/badge/POST-ERROR_0%25-green">
@@ -61,8 +66,7 @@ KakaoPay 서비스를 연동하여 결제 기능을 구현하며, 향후 다양�
 ```
 - 전체 빌드 및 테스트 수행 </br>
 - 테스트 결과: build/test-results/test/ </br>
-- 커버리지 리포트: build/reports/jacoco/test/html/index.html
-  - 브라우저로 위 index.html 파일을 열면 커버리지 시각화 리포트를 확인할 수 있습니다.
+- 커버리지 리포트: [build/reports/jacoco/test/html/index.html](https://yeonjue-2.github.io/Static-web/cmc-Jacoco/html/index.html) 
 
 </br>
 
@@ -84,3 +88,7 @@ KakaoPay 서비스를 연동하여 결제 기능을 구현하며, 향후 다양�
 </br>
 
 ## 참고 자료
+
+- [카카오페이](https://developers.kakaopay.com/docs/payment/online/common)
+- [클린 코드](https://product.kyobobook.co.kr/detail/S000001032980)
+- [JaCoCo](https://github.com/jacoco/jacoco?tab=readme-ov-file)
