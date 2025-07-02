@@ -27,7 +27,7 @@ public class OrderResponseV1 {
     public static OrderResponseV1 fromEntity(Order order) {
         return OrderResponseV1.builder()
                 .orderId(order.getId())
-                .userId(order.getId())
+                .userId(order.getUserId())
                 .productId(order.getProduct().getId())
                 .orderStatus(order.getOrderStatus())
                 .totalAmount(order.getTotalAmount())

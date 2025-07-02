@@ -5,7 +5,7 @@
   "orderStatus": "INITIAL",
   "totalAmount": 10000,
   "quantity": 1,
-  "kakaopayReadyUrl": null,
+  "kakaoPayReadyUrl": null,
   "createdAt": "2025-05-24T21:41:17.417899",
   "updatedAt": "2025-05-24T21:41:17.417899"
 }
