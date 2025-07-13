@@ -1,13 +1,14 @@
 package hello.commerce.common.properties;
 
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "kakao")  // yml에 정의된 properties 값 자동 바인딩
 @Getter
 @Setter
+@Slf4j
 public class KakaoPayProperties {
     private String cid;
     private String secretKey;
@@ -16,11 +17,6 @@ public class KakaoPayProperties {
     private String approveUrl;
     private String baseRedirectUrl;
     private int taxFreeAmount;
-
-    @PostConstruct
-    public void init() {
-        System.out.println("[DEBUG] baseRedirectUrl = " + baseRedirectUrl);
-    }
 
     public String getApprovalRedirectUrl(Long orderId) {
         return baseRedirectUrl + "/" + orderId + "/approve";

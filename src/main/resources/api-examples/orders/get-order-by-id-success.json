@@ -5,7 +5,7 @@
   "orderStatus": "PAID",
   "totalAmount": 20000,
   "quantity": 2,
-  "kakaopayReadyUrl": "",
+  "kakaoPayReadyUrl": "",
   "createdAt": "2025-05-11T05:03:20",
   "updatedAt": "2025-05-11T05:03:20"
 }

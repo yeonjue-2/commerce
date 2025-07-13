@@ -29,5 +29,8 @@ kakao:
   ready-url: /v1/payment/ready        # 카카오 API 호출용
   approve-url: /v1/payment/approve    # 카카오 API 호출용
   base-redirect-url: http://localhost:8080/v1/payments/orders  # 사용자 리다이렉트 조합용
-#  base-redirect-url: https://24bc-125-247-166-240.ngrok-free.app/v1/payments/orders  # 사용자 리다이렉트 조합용
   tax-free-amount: 0
+
+frontend:
+  vue:
+    base-url: http://localhost:5173
