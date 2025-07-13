@@ -2,7 +2,6 @@ package hello.commerce.payment;
 
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
-import hello.commerce.common.response.ApiResponse;
 import hello.commerce.config.ControllerTestSupport;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
@@ -12,7 +11,6 @@ import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
@@ -105,21 +103,16 @@ class PaymentControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    @DisplayName("GET /v1/payments/orders/{order_id}/approve 결제 승인 성공")
-    void approvePayment_success() throws Exception {
+    @DisplayName("GET /v1/payments/orders/{order_id}/approve 결제 승인 성공 후 리다이렉트")
+    void approvePayment_redirectsToSuccess() throws Exception {
         // given
         String pgToken = "sample_pgToken";
-
-        // expected JSON
-        String expectedJson = objectMapper.writeValueAsString(
-                new ApiResponse<>(HttpStatus.OK, PAYMENT_APPROVE_SUCCESS_MESSAGE, null)
-        );
 
         // when & then
         mockMvc.perform(get("/v1/payments/orders/{orderId}/approve", order.getId())
                         .param("pg_token", pgToken))
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedJson));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", PAYMENT_APPROVE_SUCCESS_URI));
     }
 
     @Test
@@ -193,27 +186,18 @@ class PaymentControllerTest extends ControllerTestSupport {
     @Test
     @DisplayName("GET /v1/payments/orders/{order_id}/fail 결제 승인 요청 실패")
     void handlePaymentFailure() throws Exception {
-        // expected JSON
-        String expectedJson = objectMapper.writeValueAsString(
-                new ApiResponse<>(HttpStatus.BAD_REQUEST, PAYMENT_APPROVE_FAIL_MESSAGE, null)
-        );
-
         // when & then
         mockMvc.perform(get("/v1/payments/orders/{order_id}/fail", order.getId()))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(expectedJson));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", PAYMENT_APPROVE_FAIL_URI));
     }
 
     @Test
     @DisplayName("GET /v1/payments/orders/{order_id}/cancel 결제 승인 요청 취소")
     void handlePaymentCancel() throws Exception {
-        // expected JSON
-        String expectedJson = objectMapper.writeValueAsString(
-                new ApiResponse<>(HttpStatus.BAD_REQUEST, PAYMENT_APPROVE_CANCEL_MESSAGE, null)
-        );
         // when & then
         mockMvc.perform(get("/v1/payments/orders/{order_id}/cancel", order.getId()))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(expectedJson));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", PAYMENT_APPROVE_CANCEL_URI));
     }
 }

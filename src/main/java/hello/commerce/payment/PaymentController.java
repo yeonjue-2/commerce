@@ -16,9 +16,9 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    public static final String PAYMENT_APPROVE_SUCCESS_URI = "http://localhost:5173/payment/result?status=success";
-    public static final String PAYMENT_APPROVE_FAIL_URI = "http://localhost:5173/payment/result?status=fail";
-    public static final String PAYMENT_APPROVE_CANCEL_URI = "http://localhost:5173/payment/result?status=cancel";
+    public static final String PAYMENT_APPROVE_SUCCESS_URI = "http://localhost:5173/payments/result?status=success";
+    public static final String PAYMENT_APPROVE_FAIL_URI = "http://localhost:5173/payments/result?status=fail";
+    public static final String PAYMENT_APPROVE_CANCEL_URI = "http://localhost:5173/payments/result?status=cancel";
 
     /* 주문 -> 결제 api(readyPayment) -> 카카오페이 내부 api 요청
      * 1.결제 승인 2.결제 실패 3.결제 취소
