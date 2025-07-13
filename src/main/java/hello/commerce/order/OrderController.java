@@ -4,7 +4,6 @@ import hello.commerce.common.request.PageRequestDto;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.dto.OrderListResponseV1;
-import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +24,10 @@ public class OrderController {
 
     @PostMapping("/v1/orders")
     public ResponseEntity<OrderResponseV1> createOrder(@Valid @RequestBody OrderRequestV1 orderRequest) {
-        Order order = orderService.createOrder(orderRequest);
-        OrderResponseV1 orderResponseV1 = OrderResponseV1.fromEntity(order);
+        OrderResponseV1 orderResponseV1 = orderService.createOrder(orderRequest);
 
         // 주문 생성 후 redirect URI 생성
-        URI location = URI.create("/v1/orders/" + order.getId());
+        URI location = URI.create("/v1/orders/" + orderResponseV1.getOrderId());
         return ResponseEntity.created(location).body(orderResponseV1);
     }
 
@@ -39,20 +37,17 @@ public class OrderController {
             @RequestParam(value = "order_status", required = false) OrderStatus orderStatus
     ) {
         Pageable pageable = pageRequestDto.toPageable();
-        Page<Order> orders = (orderStatus != null)
+        Page<OrderResponseV1> orderPage = (orderStatus != null)
                 ? orderService.getOrders(pageable, orderStatus)
                 : orderService.getOrders(pageable);
-        OrderListResponseV1 orderListResponseV1 = OrderListResponseV1.fromEntities(orders);
+        OrderListResponseV1 orderListResponseV1 = OrderListResponseV1.from(orderPage);
 
         return ResponseEntity.ok(orderListResponseV1);
     }
 
     @GetMapping("/v1/orders/{order_id}")
     public ResponseEntity<OrderResponseV1> getOrderById(@PathVariable("order_id") Long orderId) {
-
-        Order orderById = orderService.getOrderById(orderId);
-        OrderResponseV1 response = OrderResponseV1.fromEntity(orderById);
-
+        OrderResponseV1 response = orderService.getOrderById(orderId);
         return ResponseEntity.ok(response);
     }
 }

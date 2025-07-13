@@ -31,7 +31,8 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleValidationException(final MethodArgumentNotValidException ex) {
 
         FieldError fieldError = ex.getBindingResult().getFieldError();
-        String field = fieldError.getField();
+
+        String field = (fieldError != null) ? fieldError.getField() : "UnKnown";
 
         ErrorCode code = switch (field) {
             case "page" -> ErrorCode.INVALID_PAGE;
@@ -79,11 +80,6 @@ public class GlobalExceptionHandler {
             case "pg_token"     -> ErrorCode.INVALID_PG_TOKEN_PARAM;
             case "order_status" -> ErrorCode.INVALID_ORDER_STATUS;
             default -> ErrorCode.INVALID_ARGUMENT;
-
-            //default -> {
-            //            log.warn("Missing unknown request parameter: {}", paramName);
-            //            yield ErrorCode.INVALID_ARGUMENT;
-            //        }
         };
 
         return new ErrorResponse(code.getCode(), code.getMessage(), null);

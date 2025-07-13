@@ -1,6 +1,5 @@
 package hello.commerce.order.dto;
 
-import hello.commerce.order.model.Order;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -20,14 +18,9 @@ public class OrderListResponseV1 {
     private int totalPages;
     private long totalElements;
 
-    public static OrderListResponseV1 fromEntities(Page<Order> orderPage) {
-
-        List<OrderResponseV1> orderDtos = orderPage.getContent().stream()
-                .map(OrderResponseV1::fromEntity)
-                .collect(Collectors.toList());
-
+    public static OrderListResponseV1 from(Page<OrderResponseV1> orderPage) {
         return OrderListResponseV1.builder()
-                .orders(orderDtos)
+                .orders(orderPage.getContent())
                 .currentPage(orderPage.getNumber() + 1)
                 .totalPages(orderPage.getTotalPages())
                 .totalElements(orderPage.getTotalElements())

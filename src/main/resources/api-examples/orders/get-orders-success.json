@@ -4,10 +4,11 @@
       "id": 101,
       "userId": 1,
       "productId": 10,
+      "productName" : "베개",
       "orderStatus": "PAID",
       "totalAmount": 22000,
       "quantity": 2,
-      "kakaopayReadyUrl": "https://kapi.kakao.com/ready/xyz123",
+      "kakaoPayReadyUrl": "https://kapi.kakao.com/ready/xyz123",
       "createdAt": "2025-05-01T12:00:00",
       "updatedAt": "2025-05-01T12:10:00"
     },
@@ -15,10 +16,11 @@
       "id": 102,
       "userId": 2,
       "productId": 11,
+      "productName" : "베개커버",
       "orderStatus": "PAID",
       "totalAmount": 15000,
       "quantity": 1,
-      "kakaopayReadyUrl": "https://kapi.kakao.com/ready/xyz456",
+      "kakaoPayReadyUrl": "https://kapi.kakao.com/ready/xyz456",
       "createdAt": "2025-05-01T12:15:00",
       "updatedAt": "2025-05-01T12:15:00"
     }

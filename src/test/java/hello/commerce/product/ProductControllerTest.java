@@ -64,7 +64,7 @@ class ProductControllerTest extends ControllerTestSupport {
     private Product createProduct(Long id) {
         return Product.builder()
                 .id(id)
-                .name("향균 베개 커버")
+                .productName("향균 베개 커버")
                 .amount(25000)
                 .stock(300)
                 .build();

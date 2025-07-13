@@ -2,7 +2,6 @@ package hello.commerce.payment;
 
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
-import hello.commerce.common.response.ApiResponse;
 import hello.commerce.config.ControllerTestSupport;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
@@ -12,11 +11,11 @@ import hello.commerce.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 
-import static hello.commerce.payment.PaymentController.*;
+import static hello.commerce.payment.PaymentController.PAYMENT_APPROVE_RESULT_URI;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -29,6 +28,9 @@ class PaymentControllerTest extends ControllerTestSupport {
     Order order;
     User user;
     Product product;
+
+    @Value("${frontend.vue.base-url}")
+    private String frontendBaseUrl;
 
     @BeforeEach
     void setUp() {
@@ -105,21 +107,17 @@ class PaymentControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    @DisplayName("GET /v1/payments/orders/{order_id}/approve 결제 승인 성공")
-    void approvePayment_success() throws Exception {
+    @DisplayName("GET /v1/payments/orders/{order_id}/approve 결제 승인 성공 후 리다이렉트")
+    void approvePayment_redirectsToSuccess() throws Exception {
         // given
         String pgToken = "sample_pgToken";
-
-        // expected JSON
-        String expectedJson = objectMapper.writeValueAsString(
-                new ApiResponse<>(HttpStatus.OK, PAYMENT_APPROVE_SUCCESS_MESSAGE, null)
-        );
+        String expectedRedirectUrl = frontendBaseUrl + PAYMENT_APPROVE_RESULT_URI + "success";
 
         // when & then
         mockMvc.perform(get("/v1/payments/orders/{orderId}/approve", order.getId())
                         .param("pg_token", pgToken))
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedJson));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", expectedRedirectUrl));
     }
 
     @Test
@@ -193,27 +191,24 @@ class PaymentControllerTest extends ControllerTestSupport {
     @Test
     @DisplayName("GET /v1/payments/orders/{order_id}/fail 결제 승인 요청 실패")
     void handlePaymentFailure() throws Exception {
-        // expected JSON
-        String expectedJson = objectMapper.writeValueAsString(
-                new ApiResponse<>(HttpStatus.BAD_REQUEST, PAYMENT_APPROVE_FAIL_MESSAGE, null)
-        );
+        // given
+        String expectedRedirectUrl = frontendBaseUrl + PAYMENT_APPROVE_RESULT_URI + "fail";
 
         // when & then
         mockMvc.perform(get("/v1/payments/orders/{order_id}/fail", order.getId()))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(expectedJson));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", expectedRedirectUrl));
     }
 
     @Test
     @DisplayName("GET /v1/payments/orders/{order_id}/cancel 결제 승인 요청 취소")
     void handlePaymentCancel() throws Exception {
-        // expected JSON
-        String expectedJson = objectMapper.writeValueAsString(
-                new ApiResponse<>(HttpStatus.BAD_REQUEST, PAYMENT_APPROVE_CANCEL_MESSAGE, null)
-        );
+        // given
+        String expectedRedirectUrl = frontendBaseUrl + PAYMENT_APPROVE_RESULT_URI + "cancel";
+
         // when & then
         mockMvc.perform(get("/v1/payments/orders/{order_id}/cancel", order.getId()))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(expectedJson));
+                .andExpect(status().isFound())
+                .andExpect(header().string("Location", expectedRedirectUrl));
     }
 }

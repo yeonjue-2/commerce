@@ -33,8 +33,8 @@ class ProductServiceTest {
     @DisplayName("상품 리스트를 페이징하여 반환한다")
     void getProducts_pagingSuccess() {
         // given
-        Product p1 = Product.builder().name("상품1").amount(10000).stock(10).build();
-        Product p2 = Product.builder().name("상품2").amount(20000).stock(20).build();
+        Product p1 = Product.builder().productName("상품1").amount(10000).stock(10).build();
+        Product p2 = Product.builder().productName("상품2").amount(20000).stock(20).build();
         List<Product> products = List.of(p1, p2);
 
         Pageable pageable = PageRequest.of(0, 2);

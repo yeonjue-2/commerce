@@ -19,12 +19,15 @@ create table users
 create table products
 (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name        VARCHAR(100)  NOT NULL,
+    product_name VARCHAR(100) NOT NULL,
     amount      INT           NOT NULL,
     stock       INT           NOT NULL,
     created_at  DATETIME      NOT NULL,
     updated_at  DATETIME      NOT NULL
 );
+
+create index idx_products_created_at
+    on products (created_at);
 
 -- 주문 테이블
 create table orders
@@ -35,7 +38,7 @@ create table orders
     order_status       ENUM ('INITIAL', 'PAID', 'CANCELED') NOT NULL  DEFAULT 'INITIAL',
     total_amount       INT                                  NOT NULL,
     quantity           INT                                  NOT NULL,
-    kakaopay_ready_url VARCHAR(512),
+    kakao_pay_ready_url VARCHAR(512),
     created_at         DATETIME                             NOT NULL,
     updated_at         DATETIME                             NOT NULL,
 
