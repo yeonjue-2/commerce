@@ -3,6 +3,7 @@ package hello.commerce.order;
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.order.dto.OrderRequestV1;
+import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.ProductReader;
@@ -23,7 +24,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public Order createOrder(OrderRequestV1 orderRequest) {
+    public OrderResponseV1 createOrder(OrderRequestV1 orderRequest) {
         // 1. 유효성 검사 - product는 영속상태
         Product product = validateOrderCondition(orderRequest);
 
@@ -36,23 +37,23 @@ public class OrderServiceImpl implements OrderService {
         product.decreaseStock(orderRequest.getQuantity());
 
         // 4. 응답 반환
-        return orderRepository.findById(order.getId())
+        return orderRepository.findWithProductById(order.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
     }
 
     @Override
-    public Page<Order> getOrders(Pageable pageable, OrderStatus orderStatus) {
-        return orderRepository.findAllByOrderStatus(pageable, orderStatus);
+    public Page<OrderResponseV1> getOrders(Pageable pageable, OrderStatus orderStatus) {
+        return orderRepository.findAllWithProductByOrderStatus(pageable, orderStatus);
     }
 
     @Override
-    public Page<Order> getOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable);
+    public Page<OrderResponseV1> getOrders(Pageable pageable) {
+        return orderRepository.findAllWithProduct(pageable);
     }
 
     @Override
-    public Order getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
+    public OrderResponseV1 getOrderById(Long orderId) {
+        return orderRepository.findWithProductById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ORDER));
     }
 

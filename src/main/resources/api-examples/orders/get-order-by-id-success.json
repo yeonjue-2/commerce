@@ -2,6 +2,7 @@
   "orderId": 2,
   "userId": 1,
   "productId": 1,
+  "productName" : "베개",
   "orderStatus": "PAID",
   "totalAmount": 20000,
   "quantity": 2,

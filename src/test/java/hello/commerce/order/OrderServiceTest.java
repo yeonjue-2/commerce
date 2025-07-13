@@ -3,6 +3,7 @@ package hello.commerce.order;
 import hello.commerce.common.exception.BusinessException;
 import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.order.dto.OrderRequestV1;
+import hello.commerce.order.dto.OrderResponseV1;
 import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.ProductReader;
@@ -57,17 +58,17 @@ class OrderServiceTest {
 
         OrderRequestV1 request = createOrderRequestWithQuantity(quantity);
 
-        Order savedOrder = createOrder(1L, expeditedAmount, quantity);
         when(productReader.findByIdForUpdate(product.getId())).thenReturn(product);
         mockOrderSaveWithId(1L);
-        when(orderRepository.findById(anyLong())).thenReturn(Optional.of(savedOrder));
+        OrderResponseV1 savedOrderResponse = createOrderResponse(1L, expeditedAmount, quantity);
+        when(orderRepository.findWithProductById(anyLong())).thenReturn(Optional.of(savedOrderResponse));
 
         // when
-        Order order = orderService.createOrder(request);
+        OrderResponseV1 order = orderService.createOrder(request);
 
         // then
         assertThat(order).isNotNull();
-        assertThat(order.getId()).isEqualTo(savedOrder.getId());
+        assertThat(order.getOrderId()).isEqualTo(savedOrderResponse.getOrderId());
         assertThat(order.getQuantity()).isEqualTo(quantity);
         assertThat(order.getTotalAmount()).isEqualTo(expeditedAmount);
         assertThat(product.getStock()).isEqualTo(200 - quantity);
@@ -132,7 +133,7 @@ class OrderServiceTest {
 
         when(productReader.findByIdForUpdate(product.getId())).thenReturn(product);
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
-        when(orderRepository.findById(nullable(Long.class))).thenReturn(Optional.empty());
+        when(orderRepository.findWithProductById(nullable(Long.class))).thenReturn(Optional.empty());
 
         // when & then
         BusinessException ex = assertThrows(BusinessException.class, () -> {
@@ -148,17 +149,17 @@ class OrderServiceTest {
         // given
         OrderStatus filter = OrderStatus.INITIAL;
         PageRequest pageable = PageRequest.of(0, 10);
-        List<Order> orders = List.of(createOrder(100L, 35000, 1), createOrder(101L, 35000, 1));
-        Page<Order> page = new PageImpl<>(orders);
+        List<OrderResponseV1> orders = List.of(createOrderResponse(100L, 35000, 1), createOrderResponse(101L, 35000, 1));
+        Page<OrderResponseV1> page = new PageImpl<>(orders);
 
-        when(orderRepository.findAllByOrderStatus(pageable, filter)).thenReturn(page);
+        when(orderRepository.findAllWithProductByOrderStatus(pageable, filter)).thenReturn(page);
 
         // when
-        Page<Order> result = orderService.getOrders(pageable, filter);
+        Page<OrderResponseV1> result = orderService.getOrders(pageable, filter);
 
         // then
         assertThat(result.getContent()).hasSize(2);
-        assertThat(result.getContent().get(0).getId()).isEqualTo(100L);
+        assertThat(result.getContent().get(0).getOrderId()).isEqualTo(100L);
         assertThat(result.getContent().get(1).getOrderStatus()).isEqualTo(OrderStatus.INITIAL);
     }
 
@@ -167,40 +168,40 @@ class OrderServiceTest {
     void getOrders_successWithNoOrderStatus() {
         // given
         PageRequest pageable = PageRequest.of(0, 10);
-        List<Order> orders = List.of(createOrder(100L, 35000, 1), createOrder(101L, 35000, 1));
-        Page<Order> page = new PageImpl<>(orders);
+        List<OrderResponseV1> orders = List.of(createOrderResponse(100L, 35000, 1), createOrderResponse(101L, 35000, 1));
+        Page<OrderResponseV1> page = new PageImpl<>(orders);
 
-        when(orderRepository.findAll(pageable)).thenReturn(page);
+        when(orderRepository.findAllWithProduct(pageable)).thenReturn(page);
 
         // when
-        Page<Order> result = orderService.getOrders(pageable);
+        Page<OrderResponseV1> result = orderService.getOrders(pageable);
 
         // then
         assertThat(result.getContent()).hasSize(2);
-        assertThat(result.getContent().get(1).getId()).isEqualTo(101L);
+        assertThat(result.getContent().get(1).getOrderId()).isEqualTo(101L);
     }
 
     @Test
     @DisplayName("orderId로 주문 조회 성공")
     void getOrdersByOrderId_success() {
         // given
-        Order order = createOrder(101L, 35000, 1);
-        when(orderRepository.findById(any())).thenReturn(Optional.of(order));
+        OrderResponseV1 order = createOrderResponse(101L, 35000, 1);
+        when(orderRepository.findWithProductById(any())).thenReturn(Optional.of(order));
 
         // when
-        Order result = orderService.getOrderById(101L);
+        OrderResponseV1 result = orderService.getOrderById(101L);
 
         // then
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(order.getId());
-        assertThat(result.getProduct().getId()).isEqualTo(order.getProduct().getId());
+        assertThat(result.getOrderId()).isEqualTo(order.getOrderId());
+        assertThat(result.getProductId()).isEqualTo(order.getProductId());
     }
 
     @Test
     @DisplayName("존재하지 않는 주문일 경우 ErrorCode.NOT_FOUND_ORDER 발생")
     void getOrdersByOrderId_notFoundOrder() {
         // given
-        when(orderRepository.findById(any())).thenReturn(Optional.empty());
+        when(orderRepository.findWithProductById(any())).thenReturn(Optional.empty());
 
         // when & then
         BusinessException ex = assertThrows(BusinessException.class, () -> {
@@ -219,6 +220,19 @@ class OrderServiceTest {
                 .orderStatus(OrderStatus.INITIAL)
                 .totalAmount(totalAmount)
                 .quantity(quantity)
+                .build();
+    }
+
+    private OrderResponseV1 createOrderResponse(Long id, int totalAmount, int quantity) {
+        return OrderResponseV1.builder()
+                .orderId(id)
+                .userId(user.getId())
+                .productId(product.getId())
+                .productName(product.getProductName())
+                .orderStatus(OrderStatus.INITIAL)
+                .totalAmount(totalAmount)
+                .quantity(quantity)
+                .kakaoPayReadyUrl("https://kakao.url/ready")
                 .build();
     }
 

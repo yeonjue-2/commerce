@@ -5,7 +5,6 @@ import hello.commerce.common.exception.ErrorCode;
 import hello.commerce.config.ControllerTestSupport;
 import hello.commerce.order.dto.OrderRequestV1;
 import hello.commerce.order.dto.OrderResponseV1;
-import hello.commerce.order.model.Order;
 import hello.commerce.order.model.OrderStatus;
 import hello.commerce.product.model.Product;
 import hello.commerce.user.model.User;
@@ -44,10 +43,10 @@ class OrderControllerTest extends ControllerTestSupport {
     void createOrder_success() throws Exception {
         // given
         OrderRequestV1 request = new OrderRequestV1(user.getId(), product.getId(), 10);
-        OrderResponseV1 expectedResponse = OrderResponseV1.fromEntity(createOrder(100L, product.getAmount(), 10));
+        OrderResponseV1 expectedResponse = createOrderResponse(product.getId(), product.getAmount(), 10);
 
         // when
-        when(orderService.createOrder(any())).thenReturn(createOrder(product.getId(), product.getAmount(), 10));
+        when(orderService.createOrder(any())).thenReturn(expectedResponse);
 
         // then
         mockMvc.perform(post("/v1/orders")
@@ -117,8 +116,8 @@ class OrderControllerTest extends ControllerTestSupport {
     @DisplayName("GET /v1/orders - 정상 요청 시 200 OK (orderStatus 파라미터 O)")
     void getOrders_successWithOrderStatus() throws Exception {
         // given
-        Order order1 = createOrder(product.getId(), product.getAmount(), product.getStock());
-        Page<Order> page = new PageImpl<>(List.of(order1), PageRequest.of(0, 20), 1);
+        OrderResponseV1 expectedResponse = createOrderResponse(product.getId(), product.getAmount(), 10);
+        Page<OrderResponseV1> page = new PageImpl<>(List.of(expectedResponse), PageRequest.of(0, 20), 1);
 
         when(orderService.getOrders(any(), eq(OrderStatus.PAID))).thenReturn(page);
 
@@ -128,8 +127,9 @@ class OrderControllerTest extends ControllerTestSupport {
                         .param("size", "20")
                         .param("order_status", "PAID"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orders[0].orderId").value(product.getId()))
-                .andExpect(jsonPath("$.orders[0].quantity").value(product.getStock()))
+                .andExpect(jsonPath("$.orders[0].productId").value(product.getId()))
+                .andExpect(jsonPath("$.orders[0].quantity").value(expectedResponse.getQuantity()))
+                .andExpect(jsonPath("$.orders[0].orderStatus").value(expectedResponse.getOrderStatus().name()))
                 .andExpect(jsonPath("$.totalElements").value(1));
     }
 
@@ -137,8 +137,8 @@ class OrderControllerTest extends ControllerTestSupport {
     @DisplayName("GET /v1/orders - 정상 요청 시 200 OK (orderStatus 파라미터 X)")
     void getOrders_successWithNoParameter() throws Exception {
         // given
-        Order order1 = createOrder(product.getId(), product.getAmount(), product.getStock());
-        Page<Order> page = new PageImpl<>(List.of(order1), PageRequest.of(0, 20), 1);
+        OrderResponseV1 expectedResponse = createOrderResponse(product.getId(), product.getAmount(), 10);
+        Page<OrderResponseV1> page = new PageImpl<>(List.of(expectedResponse), PageRequest.of(0, 20), 1);
 
         when(orderService.getOrders(any())).thenReturn(page);
 
@@ -147,8 +147,8 @@ class OrderControllerTest extends ControllerTestSupport {
                         .param("page", "1")
                         .param("size", "20"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orders[0].orderId").value(product.getId()))
-                .andExpect(jsonPath("$.orders[0].quantity").value(product.getStock()))
+                .andExpect(jsonPath("$.orders[0].productId").value(product.getId()))
+                .andExpect(jsonPath("$.orders[0].quantity").value(expectedResponse.getQuantity()))
                 .andExpect(jsonPath("$.totalElements").value(1));
     }
 
@@ -178,14 +178,14 @@ class OrderControllerTest extends ControllerTestSupport {
     @DisplayName("GET /v1/orders/{order_id} - 정상 요청 시 200 OK")
     void getOrderById_success() throws Exception {
         // given
-        Order order = createOrder(product.getId(), product.getAmount(), product.getStock());
-        when(orderService.getOrderById(any())).thenReturn(order);
+        OrderResponseV1 expectedResponse = createOrderResponse(product.getId(), product.getAmount(), product.getStock());
+        when(orderService.getOrderById(any())).thenReturn(expectedResponse);
 
         // when & then
-        mockMvc.perform(get("/v1/orders/{order_id}", order.getId()))
+        mockMvc.perform(get("/v1/orders/{order_id}", expectedResponse.getOrderId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orderId").value(order.getId()))
-                .andExpect(jsonPath("$.orderStatus").value(order.getOrderStatus().name()));
+                .andExpect(jsonPath("$.orderId").value(expectedResponse.getOrderId()))
+                .andExpect(jsonPath("$.orderStatus").value(expectedResponse.getOrderStatus().name()));
     }
 
     @Test
@@ -211,11 +211,12 @@ class OrderControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.errorMessage").value(ErrorCode.NOT_FOUND_ORDER.getMessage()));
     }
 
-    private Order createOrder(Long id, int totalAmount, int quantity) {
-        return Order.builder()
-                .id(id)
+    private OrderResponseV1 createOrderResponse(Long id, int totalAmount, int quantity) {
+        return OrderResponseV1.builder()
+                .orderId(id)
                 .userId(user.getId())
-                .product(product)
+                .productId(product.getId())
+                .productName(product.getProductName())
                 .orderStatus(OrderStatus.INITIAL)
                 .totalAmount(totalAmount)
                 .quantity(quantity)
