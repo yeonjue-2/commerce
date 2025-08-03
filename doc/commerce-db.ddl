@@ -10,9 +10,26 @@ USE commerce;
 create table users
 (
     id          BIGINT AUTO_INCREMENT PRIMARY KEY,
-    username    VARCHAR(50)   NOT NULL,
+    user_id     VARCHAR(50)   NOT NULL UNIQUE,
+    password    VARCHAR(255),
+    email       VARCHAR(255)  NOT NULL UNIQUE,
+    role        VARCHAR(50)   NOT NULL DEFAULT 'ROLE_USER',
+    provider    VARCHAR(50),
+    provider_id VARCHAR(255),
     created_at  DATETIME      NOT NULL,
     updated_at  DATETIME      NOT NULL
+);
+
+-- 토큰 테이블
+create table refresh_tokens
+(
+    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id       BIGINT        NOT NULL,
+    token         VARCHAR(255)  NOT NULL UNIQUE,
+    expiry_date   DATETIME      NOT NULL,
+    created_at    DATETIME      NOT NULL,
+    updated_at    DATETIME      NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- 상품 테이블
@@ -35,7 +52,7 @@ create table orders
     id                 BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id            BIGINT                               NOT NULL,
     product_id         BIGINT                               NOT NULL,
-    order_status       ENUM ('INITIAL', 'PAID', 'CANCELED') NOT NULL  DEFAULT 'INITIAL',
+    order_status       ENUM ('INITIAL', 'PAID', 'CANCELED') NOT NULL DEFAULT 'INITIAL',
     total_amount       INT                                  NOT NULL,
     quantity           INT                                  NOT NULL,
     kakao_pay_ready_url VARCHAR(512),
