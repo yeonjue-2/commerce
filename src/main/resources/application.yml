@@ -31,6 +31,16 @@ kakao:
   base-redirect-url: http://localhost:8080/v1/payments/orders  # 사용자 리다이렉트 조합용
   tax-free-amount: 0
 
+jwt:
+  secret: cos
+  expiration-time: 60000
+  token-prefix: Bearer
+  header-string: Authorization
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
 frontend:
   vue:
     base-url: http://localhost:5173
