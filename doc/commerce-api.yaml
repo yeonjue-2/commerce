@@ -13,6 +13,10 @@ tags:
     description: 주문 관련 API
   - name: payment
     description: 결제 관련 API
+  - name: user
+    description: 사용자 관련 API
+  - name: auth
+    description: authentication 관련 API
 paths:
   /v1/products:
     get:
@@ -202,6 +206,207 @@ paths:
               examples:
                 NOT_FOUND_ORDER:
                   $ref: "#/components/examples/NOT_FOUND_ORDER"
+  /v1/users/join:
+    post:
+      tags:
+        - user
+      summary: 사용자 회원가입 요청
+      description: 신규 사용자의 회원가입을 처리하고, 성공 시 생성된 사용자 정보를 반환합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserJoinRequestV1"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserJoinResponseV1"
+        '400':
+          description: Bad Request - 유효성 검증 실패
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_LOGIN_INPUT:
+                  $ref: "#/components/examples/INVALID_LOGIN_INPUT"
+        '409':
+          description: Confilct - 이미 존재하는 사용자
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_CREDENTIALS:
+                  $ref: "#/components/examples/USER_ALREADY_EXISTS"
+  /v1/users/login:
+    post:
+      tags:
+        - user
+      summary: 사용자 일반 로그인(JWT)
+      description: 등록된 사용자의 ID와 비밀번호를 사용하여 로그인하고, 성공 시 JWT 토큰을 발급합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLoginRequestV1"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserLoginResponseV1"
+        '400':
+          description: Bad Request - 유효성 검증 실패
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_LOGIN_INPUT:
+                  $ref: "#/components/examples/INVALID_LOGIN_INPUT"
+        '401':
+          description: Unauthorized - 인증 실패
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_CREDENTIALS:
+                  $ref: "#/components/examples/INVALID_CREDENTIALS"
+  /v1/users/{user_id}:
+    get:
+      tags:
+        - user
+      summary: 사용자 정보 조회 (인증 필요)
+      description: 로그인한 사용자의 정보를 조회합니다.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/user_id"
+      responses:
+        '200':
+          description: OK - 사용자 정보 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponseV1"
+        '401':
+          description: Unauthorized - 인증 실패
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                EXPIRED_TOKEN:
+                  $ref: "#/components/examples/EXPIRED_TOKEN"
+        '403':
+          description: Forbidden - 권한없음
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                PERMISSION_DENIED:
+                  $ref: "#/components/examples/PERMISSION_DENIED"
+        '404':
+          description: NOT_FOUND
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                NOT_FOUND_USER:
+                  $ref: "#/components/examples/NOT_FOUND_USER"
+  /v1/auth/token/refresh:
+    post:
+      tags:
+        - auth
+      summary: JWT Access Token 갱신
+      description: Refresh Token을 사용하여 새로운 Access Token과 Refresh Token을 발급합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthTokenRefreshRequestV1"
+      responses:
+        '200':
+          description: OK - 토큰 갱신 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserLoginResponseV1"
+        '400':
+          description: Bad Request - 유효성 검증 실패
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                INVALID_TOKEN:
+                  $ref: "#/components/examples/INVALID_TOKEN"
+        '401':
+          description: Unauthorized - 인증 실패
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                EXPIRED_TOKEN:
+                  $ref: "#/components/examples/EXPIRED_TOKEN"
+  /v1/auth/logout:
+    post:
+      tags:
+        - auth
+      summary: 사용자 로그아웃
+      description: 현재 사용자의 JWT Access Token과 Refresh Token을 모두 무효화하여 로그아웃을 처리합니다.
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: No Content - 로그아웃 성공
+        '401':
+          description: Unauthorized - 인증 실패
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                EXPIRED_TOKEN:
+                  $ref: "#/components/examples/EXPIRED_TOKEN"
+  /v1/auth/{provider}/login:
+    get:
+      tags:
+        - auth
+      summary: OAuth 로그인 시작
+      description: 지정된 소셜 로그인 제공자({provider})의 인증 페이지로 사용자를 리다이렉트합니다.
+      parameters:
+        - $ref: "#/components/parameters/provider"
+      responses:
+        '302':
+          description: Found - 소셜 로그인 페이지로 리다이렉트
+          headers:
+            Location:
+              description: 소셜 로그인 제공자의 인증 페이지 URL
+              schema:
+                type: string
+                example: "https://accounts.google.com/o/oauth2/v2/auth?..."
+        '404':
+          description: Not Found - 지원하지 않는 제공자
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                NOT_FOUND_PROVIDER:
+                  $ref: "#/components/examples/NOT_FOUND_PROVIDER"
 
 components:
   parameters:
@@ -231,8 +436,45 @@ components:
       schema:
         type: integer
         example: 123
+    provider:
+      name: provider
+      in: path
+      required: true
+      description: 소셜 로그인 제공자 이름
+      schema:
+        type: string
+        enum:
+          - GOOGLE
+          - NAVER
+          - KAKAO
+        example: KAKAO
+    user_id:
+      name: user_id
+      in: path
+      required: true
+      description: 조회할 사용자의 ID
+      schema:
+        type: string
+        example: "testuser123"
 
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error_code:
+          type: integer
+        error_message:
+          type: string
+        error_data:
+          type: object
+          additionalProperties: true
+          example:
+            display_message: "display_message"
     ProductResponseV1:
       type: object
       properties:
@@ -417,18 +659,93 @@ components:
         totalElements:
           type: integer
           example: 100
-    ErrorResponse:
+
+    UserJoinRequestV1:
+      type: object
+      required:
+        - userId
+        - password
+        - email
+      properties:
+        userId:
+          type: string
+          description: 사용자 아이디
+          example: "testuser123"
+        password:
+          type: string
+          format: password
+          description: 사용자 비밀번호 (최소 8자, 영문, 숫자, 특수문자 포함)
+          example: "password123!"
+        email:
+          type: string
+          format: email
+          description: 사용자 이메일
+          example: "test@example.com"
+    UserJoinResponseV1:
       type: object
       properties:
-        error_code:
-          type: integer
-        error_message:
+        userId:
           type: string
-        error_data:
-          type: object
-          additionalProperties: true
-          example:
-            display_message: "display_message"
+          description: 생성된 사용자 아이디
+          example: "testuser123"
+        email:
+          type: string
+          description: 생성된 사용자 이메일
+          example: "test@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          description: 계정 생성 시간
+          example: "2025-08-03T17:30:00Z"
+    UserLoginRequestV1:
+      type: object
+      required:
+        - userId
+        - password
+      properties:
+        userId:
+          type: string
+          example: "testuser123"
+        password:
+          type: string
+          format: password
+          example: "password123!"
+    UserLoginResponseV1:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    UserResponseV1:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: 사용자 아이디
+          example: "testuser123"
+        email:
+          type: string
+          description: 사용자 이메일
+          example: "test@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          description: 가입일
+          example: "2025-08-03T17:30:00Z"
+
+    AuthTokenRefreshRequestV1:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: 갱신에 사용될 Refresh Token
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
 
   examples:
     INVALID_PAGE:
@@ -485,4 +802,51 @@ components:
         error_code: 300006
         error_message: "결제 준비는 INITIAL 상태의 주문에서만 가능합니다."
         error_data: null
-
+    INVALID_LOGIN_INPUT:
+      summary: 유효하지 않은 로그인 데이터
+      value:
+        error_code: 400001
+        error_message: "유효하지 않은 입력입니다."
+        error_data: null
+    USER_ALREADY_EXISTS:
+      summary: 사용자 ID 또는 이메일 중복
+      value:
+        error_code: 400002
+        error_message: "이미 존재하는 사용자 ID 또는 이메일입니다."
+        error_data: null
+    INVALID_CREDENTIALS:
+      summary: 아이디 또는 비밀번호 불일치
+      value:
+        error_code: 400003
+        error_message: "아이디 또는 비밀번호가 올바르지 않습니다."
+        error_data: null
+    INVALID_TOKEN:
+      summary: 유효하지 않은 토큰
+      value:
+        error_code: 400004
+        error_message: "요청에 포함된 토큰의 형식이 유효하지 않습니다."
+        error_data: null
+    EXPIRED_TOKEN:
+      summary: 만료된 토큰
+      value:
+        error_code: 400005
+        error_message: "토큰이 만료되어 더 이상 사용할 수 없습니다. 다시 로그인해 주세요."
+        error_data: null
+    NOT_FOUND_PROVIDER:
+      summary: 만료된 토큰
+      value:
+        error_code: 400006
+        error_message: "지원하지 않는 OAuth 제공자입니다."
+        error_data: null
+    PERMISSION_DENIED:
+      summary: 권한 없음
+      value:
+        error_code: 400007
+        error_message: "다른 사용자의 정보는 조회할 수 없습니다."
+        error_data: null
+    NOT_FOUND_USER:
+      summary: 해당하는 사용자를 찾을 수 없음
+      value:
+        error_code: 400008
+        error_message: "해당 사용자를 찾을 수 없습니다."
+        error_data: null

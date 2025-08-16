@@ -33,7 +33,7 @@ class OrderControllerTest extends ControllerTestSupport {
 
     @BeforeEach
     void setUp() {
-        user = new User(100L, "nonamed");
+        user = new User(100L, "nonamed", "", "test@test.com", "ROLE_USER", "", "");
         product = new Product(100L, "향균 베개 커버", 35000, 200);
     }
 
