@@ -36,20 +36,25 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String header = request.getHeader("Authorization");
 
-        if (header == null || !header.startsWith("Bearer ")) {
+        if (header == null || !header.startsWith("Bearer")) {
             chain.doFilter(request, response);
             return;
         }
 
-        String token = request.getHeader("Authorization").replace("Bearer ", "");
-        String username = jwtTokenProvider.getUsernameFromToken(token);
+        String token = header.substring(("Bearer" + " ").length());
 
-        if (username != null) {
-            User user = userRepository.findByUserId(username)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
-            PrincipalDetails principalDetails = new PrincipalDetails(user);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (jwtTokenProvider.validateToken(token)) {
+            String username = jwtTokenProvider.getUsernameFromToken(token);
+
+            if (username != null) {
+                User user = userRepository.findByUserId(username)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+                // SecurityContext에 인증 정보 저장
+                PrincipalDetails principalDetails = new PrincipalDetails(user);
+                Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
         chain.doFilter(request, response);

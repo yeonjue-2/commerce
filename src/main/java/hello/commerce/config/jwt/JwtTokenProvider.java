@@ -48,18 +48,6 @@ public class JwtTokenProvider {
                 .sign(Algorithm.HMAC512(secretKey)); // secret 키로 서명
     }
 
-    public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + expirationTime);
-
-        return JWT.create()
-                .withSubject(username)
-                .withIssuedAt(now)
-                .withExpiresAt(validity)
-                .sign(Algorithm.HMAC256(secretKey));
-    }
-
     // 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
         DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(secretKey)).build().verify(token);

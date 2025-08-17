@@ -32,13 +32,23 @@ public enum ErrorCode {
     NOT_FOUND_PAYMENT       (400_001, "결제 데이터를 찾을 수 없습니다."           , HttpStatus.NOT_FOUND),
     INVALID_PG_TOKEN_PARAM  (400_003, "유효하지 않은 token 값입니다."           , HttpStatus.BAD_REQUEST ),
     ALREADY_PREPARED_PAYMENT(400_004, "이미 결제정보가 존재합니다."              , HttpStatus.CONFLICT),
-    NOT_FOUND_USER          (400_008, "사용자 정보를 찾을 수 없습니다."           , HttpStatus.NOT_FOUND),
 
-    // 500xxx: 외부 API 관련
-    KAKAO_API_ERROR         (500_001, "카카오페이 API 호출 중 오류가 발생하였습니다.", HttpStatus.BAD_GATEWAY),
+    // 500XXX: 사용자
+    INVALID_LOGIN_INPUT      (500_001, "유효하지 않은 로그인 정보입니다."           , HttpStatus.BAD_REQUEST),
+    USER_ALREADY_EXISTS      (500_002, "이미 존재하는 사용자 ID 또는 이메일입니다."   , HttpStatus.CONFLICT),
+    INVALID_CREDENTIALS      (500_003, "아이디 또는 비밀번호가 올바르지 않습니다."     , HttpStatus.BAD_REQUEST),
+    INVALID_TOKEN            (500_004, "요청에 포함된 토큰의 형식이 유효하지 않습니다." , HttpStatus.BAD_REQUEST),
+    EXPIRED_TOKEN            (500_005, "토큰이 만료되어 더 이상 사용할 수 없습니다. 다시 로그인해 주세요." , HttpStatus.UNAUTHORIZED),
+    NOT_FOUND_PROVIDER       (500_006, "지원하지 않는 OAuth 제공자입니다."          , HttpStatus.NOT_FOUND),
+    PERMISSION_DENIED        (500_007, "다른 사용자의 정보는 조회할 수 없습니다."      , HttpStatus.FORBIDDEN),
+    NOT_FOUND_USER           (500_008, "사용자 정보를 찾을 수 없습니다."             , HttpStatus.NOT_FOUND),
+
+    // 600xxx: 외부 API 관련
+    KAKAO_API_ERROR         (600_001, "카카오페이 API 호출 중 오류가 발생하였습니다.", HttpStatus.BAD_GATEWAY),
 
     // 999xxx: 기타
-    INTERNAL_SERVER_ERROR   (999_999, "예상치 못한 오류가 발생했습니다."          , HttpStatus.BAD_REQUEST);
+    INTERNAL_SERVER_ERROR   (999_999, "예상치 못한 오류가 발생했습니다."          , HttpStatus.INTERNAL_SERVER_ERROR),
+    NETWORK_ERROR           (999_999, "네트워크 오류"                         , HttpStatus.INTERNAL_SERVER_ERROR);
 
 
     private final int code;

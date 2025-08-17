@@ -38,16 +38,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             // 1. request Body에서 username과 password를 파싱
             ObjectMapper om = new ObjectMapper();
             UserLoginRequestV1 userLoginRequest = om.readValue(request.getInputStream(), UserLoginRequestV1.class);
-            log.info("로그인 요청 DTO: {}", userLoginRequest);
+            log.info("로그인 요청 : {}", userLoginRequest.getUserId());
 
-            // 2. UsernamePasswordAuthenticationToken 생성
-            // AuthenticationManager에게 인증을 위임할 토큰을 생성
+            // 2. UsernamePasswordAuthenticationToken 생성, AuthenticationManager에게 인증을 위임할 토큰을 생성
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(userLoginRequest.getUserId(), userLoginRequest.getPassword());
 
             // 3. AuthenticationManager를 통해 인증 시도
-            // PrincipalDetailsService의 loadUserByUsername() 메서드가 실행됨
-            // 인증 성공 시 Authentication 객체를 반환
+            // PrincipalDetailsService의 loadUserByUsername() 메서드가 실행됨, 인증 성공 시 Authentication 객체를 반환
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
             // PrincipalDetails 객체를 가져와서 로그인된 사용자 정보 확인
@@ -69,14 +67,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
         log.info("JwtAuthenticationFilter: 인증 성공");
-
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
         // JWT 토큰 생성, RSA 방식이 아닌 Hash 암호 방식
         String jwtToken = jwtTokenProvider.createToken(principalDetails.getUsername());
 
         // 응답 헤더에 JWT 토큰 추가
-        response.addHeader(jwtTokenProvider.getHeaderString(), jwtTokenProvider.getTokenPrefix() + jwtToken);
+        response.addHeader(jwtTokenProvider.getHeaderString(), jwtTokenProvider.getTokenPrefix() + " " + jwtToken);
         response.getWriter().write("Login successful!"); // 성공 메시지 반환
     }
 

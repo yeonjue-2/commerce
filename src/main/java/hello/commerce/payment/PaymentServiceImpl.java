@@ -16,11 +16,11 @@ import hello.commerce.payment.model.PaymentStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final OrderRepository orderRepository;
     private final OrderReader orderReader;
-    private final WebClient webClient;
+    private final RestTemplate kakaoRestTemplate;
     private final KakaoPayProperties kakaoPayProps;
     private final PaymentRepository paymentRepository;
     private final PaymentHistoryRepository paymentHistoryRepository;
@@ -124,22 +124,21 @@ public class PaymentServiceImpl implements PaymentService {
         requestBody.put("cancel_url", request.getCancelUrl());
         requestBody.put("fail_url", request.getFailUrl());
 
-        // 응답 객체는 KakaoPayReadyResponseV1와 동일 구조를 맞춰야 함
-        KakaoPayReadyResponseV1 response = webClient.post()
-                .uri(kakaoPayProps.getReadyUrl()) // /v1/payment/ready
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .onStatus(
-                        HttpStatusCode::isError,
-                        clientResponse -> clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> {
-                                    log.error("카카오페이 오류 응답 본문: {}", errorBody);
-                                    return Mono.error(new BusinessException(ErrorCode.KAKAO_API_ERROR));
-                                })
-                )
-                .bodyToMono(KakaoPayReadyResponseV1.class)
-                .block();// 동기
+        KakaoPayReadyResponseV1 response = null;
+
+        try {
+            response = kakaoRestTemplate.postForObject(
+                    kakaoPayProps.getReadyUrl(),
+                    requestBody,
+                    KakaoPayReadyResponseV1.class
+            );
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("카카오페이 API 호출 중 오류 발생: 상태 코드 = {}, 본문 = {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new BusinessException(ErrorCode.KAKAO_API_ERROR);
+        } catch (ResourceAccessException e) {
+            log.error("네트워크 오류 발생: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.NETWORK_ERROR);
+        }
 
         // 응답 값 유효성 검사
         if (response == null || response.getTid() == null || response.getNextRedirectPcUrl() == null) {
@@ -162,28 +161,28 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private KakaoPayApproveResponseV1 callKakaoPayApprove(String pgToken, String tid, Order order) {
-        HashMap<String, String> form = new HashMap<>();
-        form.put("cid", kakaoPayProps.getCid());
-        form.put("tid", tid);
-        form.put("partner_order_id", order.getId().toString());
-        form.put("partner_user_id", order.getUserId().toString());
-        form.put("pg_token", pgToken);
+        HashMap<String, String> requestBody = new HashMap<>();
+        requestBody.put("cid", kakaoPayProps.getCid());
+        requestBody.put("tid", tid);
+        requestBody.put("partner_order_id", order.getId().toString());
+        requestBody.put("partner_user_id", order.getUserId().toString());
+        requestBody.put("pg_token", pgToken);
 
-        KakaoPayApproveResponseV1 response = webClient.post()
-                .uri(kakaoPayProps.getApproveUrl()) // /v1/payment/approve
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(form)
-                .retrieve()
-                .onStatus(
-                        HttpStatusCode::isError,
-                        clientResponse -> clientResponse.bodyToMono(String.class)
-                                .flatMap(errorBody -> {
-                                    log.error("카카오페이 오류 응답 본문: {}", errorBody);
-                                    return Mono.error(new BusinessException(ErrorCode.KAKAO_API_ERROR));
-                                })
-                )
-                .bodyToMono(KakaoPayApproveResponseV1.class)
-                .block();
+        KakaoPayApproveResponseV1 response = null;
+
+        try {
+            response = kakaoRestTemplate.postForObject(
+                    kakaoPayProps.getApproveUrl(),
+                    requestBody,
+                    KakaoPayApproveResponseV1.class
+            );
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            log.error("카카오페이 API 호출 중 오류 발생: 상태 코드 = {}, 본문 = {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new BusinessException(ErrorCode.KAKAO_API_ERROR);
+        } catch (ResourceAccessException e) {
+            log.error("네트워크 오류 발생: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.NETWORK_ERROR);
+        }
 
         // 응답 값 유효성 검사
         if (response == null || response.getTid() == null || response.getApprovedAt() == null) {

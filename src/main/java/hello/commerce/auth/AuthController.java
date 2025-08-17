@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping
 public class AuthController {
 
     @PostMapping("/v1/auth/token/refresh")

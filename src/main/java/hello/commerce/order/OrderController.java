@@ -17,7 +17,6 @@ import java.net.URI;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping
 public class OrderController {
 
     private final OrderService orderService;
@@ -26,7 +25,6 @@ public class OrderController {
     public ResponseEntity<OrderResponseV1> createOrder(@Valid @RequestBody OrderRequestV1 orderRequest) {
         OrderResponseV1 orderResponseV1 = orderService.createOrder(orderRequest);
 
-        // 주문 생성 후 redirect URI 생성
         URI location = URI.create("/v1/orders/" + orderResponseV1.getOrderId());
         return ResponseEntity.created(location).body(orderResponseV1);
     }

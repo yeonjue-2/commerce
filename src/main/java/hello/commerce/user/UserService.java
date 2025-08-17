@@ -1,10 +1,6 @@
 package hello.commerce.user;
 
-import hello.commerce.user.dto.UserJoinRequestV1;
-import hello.commerce.user.dto.UserJoinResponseV1;
-import hello.commerce.user.dto.UserLoginRequestV1;
-import hello.commerce.user.dto.UserLoginResponseV1;
-import hello.commerce.user.model.User;
+import hello.commerce.user.dto.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +11,7 @@ public interface UserService {
      * @param userId
      * @return 주문 단건 응답
      */
-    User getUserById(Long userId);
+    UserResponseV1 getUserById(String userId);
 
     /**
      * User 회원가입
@@ -23,11 +19,4 @@ public interface UserService {
      * @return
      */
     UserJoinResponseV1 joinUser(UserJoinRequestV1 request);
-
-    /**
-     * User 로그인
-     * @param request
-     * @return
-     */
-    UserLoginResponseV1 loginUser(UserLoginRequestV1 request);
 }
